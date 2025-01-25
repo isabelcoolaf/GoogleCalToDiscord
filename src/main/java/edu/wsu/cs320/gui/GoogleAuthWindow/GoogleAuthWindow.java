@@ -1,4 +1,4 @@
-package edu.wsu.cs320.GoogleAuthWindow;
+package edu.wsu.cs320.gui.GoogleAuthWindow;
 
 import javax.swing.*;
 
