@@ -7,7 +7,6 @@ import javax.swing.*;
 public class GoogleCalToDiscord {
 
     public static void main(String[] args) {
-        System.out.println("Hello, world!");
         JFrame frame = new JFrame("Google Auth Window");
         GoogleAuthWindow authWindow = new GoogleAuthWindow();
 
