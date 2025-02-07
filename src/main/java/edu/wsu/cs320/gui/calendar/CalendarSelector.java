@@ -13,11 +13,11 @@ public class CalendarSelector {
     private JLabel selectCalendarLabel;
     private JPanel mainPanel;
     private JPanel entryPanel;
-    private CalendarSelectorEntry[] entries;
+    private CalendarSelectorButton[] entries;
     private ButtonGroup entryButtonGroup = new ButtonGroup();
 
     void addEntry(Calendar calendar) {
-        CalendarSelectorEntry newEntry = new CalendarSelectorEntry();
+        CalendarSelectorButton newEntry = new CalendarSelectorButton();
         newEntry.calendar = calendar;
         newEntry.setText(calendar.getSummary());
         newEntry.setToolTipText(calendar.getDescription());

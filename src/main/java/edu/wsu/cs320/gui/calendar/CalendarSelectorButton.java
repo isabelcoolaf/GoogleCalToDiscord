@@ -4,6 +4,6 @@ import com.google.api.services.calendar.model.Calendar;
 
 import javax.swing.JRadioButton;
 
-public class CalendarSelectorEntry extends JRadioButton {
+public class CalendarSelectorButton extends JRadioButton {
     public Calendar calendar;
 }
