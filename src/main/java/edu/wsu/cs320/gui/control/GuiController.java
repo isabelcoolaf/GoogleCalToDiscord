@@ -1,6 +1,6 @@
 package edu.wsu.cs320.gui.control;
 
-public class Controller {
+public class GuiController {
 
     public enum StateEnum{
         AUTH,
@@ -10,7 +10,7 @@ public class Controller {
 
     private StateEnum state;
 
-    public Controller() {
+    public GuiController() {
 
     }
 }
