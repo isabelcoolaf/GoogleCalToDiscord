@@ -3,6 +3,8 @@ package edu.wsu.cs320.commands;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.session.ReadyEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
+import net.dv8tion.jda.api.interactions.IntegrationType;
+import net.dv8tion.jda.api.interactions.InteractionContextType;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
@@ -33,7 +35,11 @@ public class SlashCommandInteractions extends ListenerAdapter {
 
         // Slash command template with option
         OptionData option_example = new OptionData(OptionType.STRING, "insert_option_name", "insert_description", true);
-        commands.add(Commands.slash("command_example", "command_example").addOptions(option_example));
+        commands.add(Commands.slash("command_example", "command_example")
+                .setContexts(InteractionContextType.ALL)
+                .setIntegrationTypes(IntegrationType.USER_INSTALL)
+                .addOptions(option_example)
+        );
 
         event.getJDA().updateCommands().addCommands(commands).queue();
     }
