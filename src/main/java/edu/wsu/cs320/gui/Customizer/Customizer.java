@@ -15,14 +15,7 @@ public class Customizer {
     private JLabel timeEnd;
     private JButton changeImageButton;
     private JLabel usingLabel;
-    private JButton imageButton;
 
     public Customizer() {
-        imageButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                System.out.println("Button");
-            }
-        });
     }
 }
