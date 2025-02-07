@@ -21,7 +21,7 @@ public class GuiController {
     }
 
 
-    public void setState(StateEnum newState) {
+    public void changeState(StateEnum newState) {
         if (guiSpawned) closeGUI();
         state = newState;
         if (guiSpawned) spawnGUI();
@@ -43,6 +43,7 @@ public class GuiController {
 
     public void closeGUI() {
         //TODO: method should destroy its given JPanel, assuming it has one
+        if (!guiSpawned) return;
         currentGUI.setVisible(false);
         guiSpawned = false;
     }
