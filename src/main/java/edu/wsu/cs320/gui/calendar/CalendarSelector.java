@@ -11,7 +11,7 @@ import java.awt.*;
 
 public class CalendarSelector {
     private JLabel selectCalendarLabel;
-    private JPanel mainPanel;
+    public JPanel mainPanel;
     private JPanel entryPanel;
     private CalendarSelectorButton[] entries;
     private ButtonGroup entryButtonGroup = new ButtonGroup();
