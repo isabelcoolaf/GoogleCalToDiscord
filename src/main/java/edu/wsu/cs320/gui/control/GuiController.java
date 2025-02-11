@@ -12,12 +12,13 @@ public class GuiController {
 
     private StateEnum state;
     private boolean guiSpawned = false;
-    private JFrame currentGUI = null;
+    private JFrame window = null;
+    private JPanel currentGUI;
     // TODO: Make currentGUI its own class for JPanel management
 
     public GuiController() {
-        currentGUI = new JFrame();
-        currentGUI.setVisible(false);
+        window = new JFrame();
+        window.setVisible(false);
     }
 
 
@@ -35,16 +36,31 @@ public class GuiController {
         return guiSpawned;
     }
 
+    /**
+     * Spawn a new GUI based on the controller's state.
+     * If a GUI is already spawned, it will replace it.
+     */
     public void spawnGUI() {
-        //TODO: method should spawn GUI based on state
-        currentGUI.setVisible(true);
+        if (guiSpawned) {
+            closeGUI();
+        }
+        switch (state) {
+            case AUTH:
+                ; // Open GoogleAuthWindow
+            case SELECT:
+                ; // Open CalendarSelector
+            case CUSTOMIZE:
+                ; // Open Customizer
+        }
+        window.setVisible(true);
         guiSpawned = true;
     }
 
     public void closeGUI() {
         //TODO: method should destroy its given JPanel, assuming it has one
         if (!guiSpawned) return;
-        currentGUI.setVisible(false);
+        window.setVisible(false);
+        window.remove(currentGUI);
         guiSpawned = false;
     }
 
