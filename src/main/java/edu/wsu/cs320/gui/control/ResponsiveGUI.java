@@ -6,7 +6,7 @@ import java.util.Calendar;
 
 public interface ResponsiveGUI {
 
-    JFrame guiFrame = null;
+    JPanel guiGuiPanel();
 
     default URI getURI() {
         return null;
