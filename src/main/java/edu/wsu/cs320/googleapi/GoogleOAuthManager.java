@@ -1,11 +1,9 @@
-package edu.wsu.cs320.auth;
+package edu.wsu.cs320.googleapi;
 
 import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeTokenRequest;
 import com.google.api.client.googleapis.auth.oauth2.GoogleTokenResponse;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.gson.GsonFactory;
-import com.google.api.services.calendar.Calendar;
-import com.google.auth.http.HttpCredentialsAdapter;
 import com.google.auth.oauth2.UserCredentials;
 import edu.wsu.cs320.config.ConfigManager;
 import jakarta.servlet.http.HttpServlet;
@@ -60,16 +58,6 @@ public class GoogleOAuthManager {
         } catch (Exception ignored) {
             return null;
         }
-    }
-
-    public Calendar getCalendarService() {
-        UserCredentials credentials = this.getCredentials();
-        if (credentials == null) {
-            return null;
-        }
-        return new Calendar.Builder(new NetHttpTransport(), GsonFactory.getDefaultInstance(), new HttpCredentialsAdapter(credentials))
-                .setApplicationName("Google Calendar to Discord")
-                .build();
     }
 
     private void storeCredentials() throws IOException {

@@ -2,7 +2,7 @@ package edu.wsu.cs320.gui.GoogleAuthWindow;
 
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
-import edu.wsu.cs320.auth.GoogleOAuthManager;
+import edu.wsu.cs320.googleapi.GoogleOAuthManager;
 
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
