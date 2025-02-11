@@ -3,12 +3,14 @@ package edu.wsu.cs320.gui.GoogleAuthWindow;
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import edu.wsu.cs320.googleapi.GoogleOAuthManager;
+import edu.wsu.cs320.gui.control.ResponsiveGUI;
 
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
 import java.awt.*;
+import java.util.ArrayList;
 
-public class GoogleAuthWindow {
+public class GoogleAuthWindow implements ResponsiveGUI {
     public JPanel mainPanel;
     private JButton saveButton;
     private JPanel centerPanel;
@@ -31,6 +33,19 @@ public class GoogleAuthWindow {
                 // the function also blocks until complete, so keep that in mind
             }
         });
+    }
+
+    @Override
+    public JPanel guiGuiPanel() {
+        return null;
+    }
+
+    @Override
+    public String[] getAuthData() {
+        String[] dataPacket = new String[2];
+        dataPacket[0] = idField.getText();
+        dataPacket[1] = secretField.getText();
+        return dataPacket;
     }
 
     {
