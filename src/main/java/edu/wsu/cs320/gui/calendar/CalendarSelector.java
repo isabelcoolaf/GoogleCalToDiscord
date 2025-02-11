@@ -16,7 +16,7 @@ public class CalendarSelector {
     private CalendarSelectorButton[] entries;
     private ButtonGroup entryButtonGroup = new ButtonGroup();
 
-    void addEntry(Calendar cal) {
+    void addButton(Calendar cal) {
         CalendarSelectorButton newEntry = new CalendarSelectorButton(cal);
         entryButtonGroup.add(newEntry);
     }
