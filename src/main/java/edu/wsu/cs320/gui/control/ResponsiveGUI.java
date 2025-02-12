@@ -2,7 +2,7 @@ package edu.wsu.cs320.gui.control;
 
 import javax.swing.*;
 import java.net.URI;
-import java.util.Calendar;
+import com.google.api.services.calendar.model.Calendar;
 
 public interface ResponsiveGUI {
 
