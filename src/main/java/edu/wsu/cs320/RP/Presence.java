@@ -11,8 +11,12 @@ import java.math.BigInteger;
 import java.time.Instant;
 
 public class Presence {
+    private String appID;
     private Activity RP;
     private Core updater;
+    public Presence(String ID){
+        appID = ID;
+    }
 
     public Activity getActivityState(){
         return RP;
@@ -25,7 +29,7 @@ public class Presence {
     public void Activity() throws IOException{
 
         // application ID
-        BigInteger ID = new BigInteger("1329903401147826299");
+        BigInteger ID = new BigInteger(appID);
 
         try(CreateParams params = new CreateParams()){
             params.setClientID(ID.longValue());
