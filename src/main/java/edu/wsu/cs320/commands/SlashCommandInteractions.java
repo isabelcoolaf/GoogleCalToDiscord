@@ -1,6 +1,5 @@
 package edu.wsu.cs320.commands;
 
-import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.model.Event;
 import de.jcm.discordgamesdk.activity.Activity;
 import de.jcm.discordgamesdk.activity.ActivityType;
@@ -33,7 +32,6 @@ public class SlashCommandInteractions extends ListenerAdapter {
     public SlashCommandInteractions(Presence RP) {
         richPresence = RP;
     }
-
     public void setGoogleCalendarHandler(GoogleCalendarServiceHandler handler){
         calHandler = handler;
     }
@@ -77,7 +75,7 @@ public class SlashCommandInteractions extends ListenerAdapter {
                 } else if (curCalendar == null) {
                     event.reply("No calendar selected! Please select a calendar first.").setEphemeral(true).queue();
                 } else {
-                    List<Event> events = null;
+                    List<Event> events;
                     try {
                         events = calHandler.getUpcomingEvents(curCalendar.getId());
                     } catch (IOException e) {
