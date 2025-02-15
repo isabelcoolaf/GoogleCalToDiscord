@@ -45,7 +45,6 @@ public class GuiController {
             if (resp.status != GuiResponse.ResponseCode.INCOMPLETE_DATA) break;
             JOptionPane.showMessageDialog(
                     window,
-
                     "Please provide a key and client ID.",
                     "Incomplete Input", JOptionPane.WARNING_MESSAGE);
         }

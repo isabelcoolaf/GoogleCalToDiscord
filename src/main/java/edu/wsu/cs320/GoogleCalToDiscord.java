@@ -2,6 +2,7 @@ package edu.wsu.cs320;
 
 import edu.wsu.cs320.googleapi.GoogleOAuthManager;
 import edu.wsu.cs320.gui.GoogleAuthWindow.GoogleAuthWindow;
+import edu.wsu.cs320.gui.control.GuiController;
 import edu.wsu.cs320.gui.control.GuiResponse;
 
 import javax.swing.*;
@@ -11,19 +12,11 @@ public class GoogleCalToDiscord {
 
     public static void main(String[] args) {
         JFrame frame = new JFrame("Google Auth Window");
-        GoogleAuthWindow authWindow = new GoogleAuthWindow();
-
-
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setContentPane(authWindow.mainPanel);
-        frame.setSize(650, 150);
-        frame.setLocationRelativeTo(null);
-        frame.setVisible(true);
-
+        GuiController controller = new GuiController();
 
         GuiResponse<String[]> resp;
         while (true) {
-            resp = authWindow.getResponse();
+            resp = controller.getAuthData();
             if (resp.status == GuiResponse.ResponseCode.INCOMPLETE_DATA) {
                 System.out.println("Data incomplete");
                 continue;
