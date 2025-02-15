@@ -3,6 +3,7 @@ package edu.wsu.cs320;
 import edu.wsu.cs320.googleapi.GoogleOAuthManager;
 import edu.wsu.cs320.gui.control.GuiController;
 import edu.wsu.cs320.gui.control.GuiResponse;
+import edu.wsu.cs320.RP.DiscordInterface;
 
 import javax.swing.*;
 import java.util.Arrays;
@@ -10,6 +11,7 @@ import java.util.Arrays;
 public class GoogleCalToDiscord {
 
     public static void main(String[] args) {
+
         JFrame frame = new JFrame("Google Auth Window");
         GuiController controller = new GuiController();
 
@@ -39,8 +41,8 @@ public class GoogleCalToDiscord {
             // the function also blocks until complete, so keep that in mind
         }
 
-        System.out.println("code: " + resp.status + " data: " + Arrays.toString(resp.data));
-
+        DiscordInterface discordInterface = new DiscordInterface("Application ID","Bot Token");
+        discordInterface.start();
     }
 
 }

@@ -1,8 +1,10 @@
 package edu.wsu.cs320.commands;
 
+import com.google.api.services.calendar.model.Event;
 import de.jcm.discordgamesdk.activity.Activity;
 import de.jcm.discordgamesdk.activity.ActivityType;
 import edu.wsu.cs320.RP.Presence;
+import edu.wsu.cs320.googleapi.GoogleCalendarServiceHandler;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.session.ReadyEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
@@ -15,19 +17,27 @@ import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import org.jetbrains.annotations.NotNull;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 public class SlashCommandInteractions extends ListenerAdapter {
-    private Presence RichPresence;
+    private Presence richPresence;
+    private com.google.api.services.calendar.model.Calendar curCalendar;
+    private GoogleCalendarServiceHandler calHandler;
 
     // Presence required so that commands can alter the data of the
     public SlashCommandInteractions(Presence RP) {
-        RichPresence = RP;
+        richPresence = RP;
     }
-
+    public void setGoogleCalendarHandler(GoogleCalendarServiceHandler handler){
+        calHandler = handler;
+    }
+    public void setCurrentCalendar(com.google.api.services.calendar.model.Calendar googleCal){
+        curCalendar = googleCal;
+    }
     @Override
     public void onSlashCommandInteraction(@NotNull SlashCommandInteractionEvent event) {
         System.out.println("Command used \"" + event.getName() + "\"");
@@ -42,7 +52,7 @@ public class SlashCommandInteractions extends ListenerAdapter {
                 OptionMapping presenceOptions = event.getOption("presence_type");
                 String presenceResponse = presenceOptions.getAsString();
 
-                Activity activity = RichPresence.getActivityState();
+                Activity activity = richPresence.getActivityState();
 
                 Map<String, ActivityType> activityTypes = new HashMap<>();
                 activityTypes.put("Playing", ActivityType.PLAYING);
@@ -54,10 +64,25 @@ public class SlashCommandInteractions extends ListenerAdapter {
                 ActivityType type = activityTypes.get(presenceResponse);
                 activity.setType(type);
 
-                RichPresence.setActivityState(activity);
+                richPresence.setActivityState(activity);
 
                 event.reply("Changed presence type to: " + presenceResponse).setEphemeral(true).queue();
                 break;
+
+            case "show_next_event":
+                if (calHandler == null){
+                    event.reply("Google Calendar not authenticated! Please sign in first.").setEphemeral(true).queue();
+                } else if (curCalendar == null) {
+                    event.reply("No calendar selected! Please select a calendar first.").setEphemeral(true).queue();
+                } else {
+                    List<Event> events;
+                    try {
+                        events = calHandler.getUpcomingEvents(curCalendar.getId());
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+                    event.reply("Next event: "+ events.get(0).toString()).setEphemeral(true).queue();
+                }
         }
     }
 
@@ -78,15 +103,21 @@ public class SlashCommandInteractions extends ListenerAdapter {
         }
 
 
-        String[] commandList = {"command_example", "presence_type"};
-        String[] commandDescriptions = {"command_example", "Changes Presence Type"};
-        OptionData[] options = {option_example, PresenceType};
+        String[] commandList = {"command_example", "presence_type", "show_next_event"};
+        String[] commandDescriptions = {"command_example", "Changes Presence Type", "Shows next calendar event"};
+        OptionData[] options = {option_example, PresenceType, null};
         for (int i = 0; i < commandList.length; i++) {
-            commands.add(Commands.slash(commandList[i], commandDescriptions[i])
-                    .setContexts(InteractionContextType.ALL)
-                    .setIntegrationTypes(IntegrationType.USER_INSTALL)
-                    .addOptions(options[i])
-            );
+            if (options[i] != null){
+                commands.add(Commands.slash(commandList[i], commandDescriptions[i])
+                        .setContexts(InteractionContextType.ALL)
+                        .setIntegrationTypes(IntegrationType.USER_INSTALL)
+                        .addOptions(options[i])
+                );
+            } else {
+                commands.add(Commands.slash(commandList[i], commandDescriptions[i])
+                        .setContexts(InteractionContextType.ALL)
+                        .setIntegrationTypes(IntegrationType.USER_INSTALL));
+            }
         }
 
 
