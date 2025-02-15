@@ -15,41 +15,6 @@ public class GuiController {
         CUSTOMIZE
     }
 
-    /**
-     * Reports data from a GUI. Make sure to confirm what GUI type it is before using its data.
-     */
-    public class GuiResponsePacket {
-        /**
-         * Determines which GUI type this packet is associated with.
-         */
-        public GuiController.StateEnum type;
-        /**
-         * If type is AUTH, this will be a String array of structure [clientID, clientSecret].
-         */
-        public String[] authInfo;
-        /**
-         * If type is SELECT, this will be the Calendar the user selected.
-         */
-        public Calendar calendar;
-        /**
-         * If type is CUSTOMIZE, this will be the URI the user specified
-         */
-        public URI imageLink;
-
-        public GuiResponsePacket() {
-            this.type = state;
-            switch (this.type) {
-                case AUTH:
-                    ;
-                case SELECT:
-                    ;
-                case CUSTOMIZE:
-                    ;
-            }
-        }
-
-    }
-
     private StateEnum state;
     private boolean guiSpawned = false;
     private JFrame window = null;
