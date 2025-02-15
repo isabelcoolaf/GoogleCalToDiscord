@@ -30,7 +30,7 @@ public class GoogleAuthWindow implements ResponsiveGUI {
     }
 
     @Override
-    public JPanel guiGuiPanel() {
+    public JPanel getGuiPanel() {
         return mainPanel;
     }
 
