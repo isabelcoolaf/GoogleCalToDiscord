@@ -5,9 +5,6 @@ import javax.swing.*;
 
 import edu.wsu.cs320.gui.GoogleAuthWindow.GoogleAuthWindow;
 
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
-
 public class GuiController {
 
     public enum StateEnum {
@@ -38,7 +35,7 @@ public class GuiController {
 
     public GuiResponse<String[]> getAuthData() {
         GoogleAuthWindow auth = new GoogleAuthWindow();
-        setGui(auth);
+        openGUI(auth);
         GuiResponse<String[]> resp = new GuiResponse<>(GuiResponse.ResponseCode.WINDOW_CLOSED, null);
         while (gui != null) {
             resp = auth.getResponse();
@@ -52,9 +49,13 @@ public class GuiController {
         return resp;
     }
 
-    private void setGui(ResponsiveGUI newGui) {
+    private void openGUI(ResponsiveGUI newGui) {
         gui = newGui;
         guiPanel = gui.getGuiPanel();
+        window.setContentPane(guiPanel);
+        window.setSize(300, 150);
+        window.setLocationRelativeTo(null);
+        window.setVisible(true);
     }
 
 
