@@ -24,7 +24,6 @@ public class GoogleAuthWindow implements ResponsiveGUI {
 
     public GoogleAuthWindow() {
         saveButton.addActionListener(event -> {
-            System.out.println("Save button clicked");
             completeResponse();
         });
     }
@@ -64,6 +63,12 @@ public class GoogleAuthWindow implements ResponsiveGUI {
             return new GuiResponse<String[]>(GuiResponse.ResponseCode.CANCELLED, null);
         }
         return result;
+    }
+
+    @Override
+    public void onWindowClose() {
+        if (pendingResponse == null) return;
+        pendingResponse.complete(new GuiResponse<String[]>(GuiResponse.ResponseCode.WINDOW_CLOSED, null));
     }
 
 

@@ -8,5 +8,7 @@ public interface ResponsiveGUI {
 
     GuiResponse getResponse();
 
+    void onWindowClose();
+
 
 }
