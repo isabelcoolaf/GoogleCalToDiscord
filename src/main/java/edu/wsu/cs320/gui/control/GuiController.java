@@ -7,14 +7,6 @@ import edu.wsu.cs320.gui.GoogleAuthWindow.GoogleAuthWindow;
 
 public class GuiController {
 
-    public enum StateEnum {
-        AUTH,
-        SELECT,
-        CUSTOMIZE
-    }
-
-    private StateEnum state;
-    private boolean guiSpawned = false;
     private JFrame window = null;
     ResponsiveGUI gui;
     private JPanel guiPanel;
@@ -56,41 +48,6 @@ public class GuiController {
         window.setSize(300, 150);
         window.setLocationRelativeTo(null);
         window.setVisible(true);
-    }
-
-
-    public void changeState(StateEnum newState) {
-        if (guiSpawned) closeGUI();
-        state = newState;
-        if (guiSpawned) spawnGUI();
-    }
-
-    public StateEnum getState() {
-        return state;
-    }
-
-    public boolean hasGUIOpen() {
-        return guiSpawned;
-    }
-
-    /**
-     * Spawn a new GUI based on the controller's state.
-     * If a GUI is already spawned, it will replace it.
-     */
-    private void spawnGUI() {
-        if (guiSpawned) {
-            closeGUI();
-        }
-        switch (state) {
-            case AUTH:
-                ; // Open GoogleAuthWindow
-            case SELECT:
-                ; // Open CalendarSelector
-            case CUSTOMIZE:
-                ; // Open Customizer
-        }
-        window.setVisible(true);
-        guiSpawned = true;
     }
 
     private void closeGUI() {
