@@ -1,11 +1,9 @@
 package edu.wsu.cs320.gui.control;
 
-import org.eclipse.jetty.http.MetaData;
 
 import javax.swing.*;
 
 import com.google.api.services.calendar.model.Calendar;
-import sun.java2d.pipe.SpanShapeRenderer;
 
 import java.net.URI;
 
