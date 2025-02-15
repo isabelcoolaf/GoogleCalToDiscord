@@ -1,7 +1,6 @@
 package edu.wsu.cs320;
 
 import edu.wsu.cs320.googleapi.GoogleOAuthManager;
-import edu.wsu.cs320.gui.GoogleAuthWindow.GoogleAuthWindow;
 import edu.wsu.cs320.gui.control.GuiController;
 import edu.wsu.cs320.gui.control.GuiResponse;
 

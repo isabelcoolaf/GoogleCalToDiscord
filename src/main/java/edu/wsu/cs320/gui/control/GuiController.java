@@ -7,7 +7,7 @@ import edu.wsu.cs320.gui.GoogleAuthWindow.GoogleAuthWindow;
 
 public class GuiController {
 
-    private JFrame window = null;
+    private JFrame window;
     ResponsiveGUI gui;
     private JPanel guiPanel;
     // TODO: Make currentGUI its own class for JPanel management

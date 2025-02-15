@@ -23,9 +23,7 @@ public class GoogleAuthWindow implements ResponsiveGUI {
     private CompletableFuture<GuiResponse<String[]>> pendingResponse;
 
     public GoogleAuthWindow() {
-        saveButton.addActionListener(event -> {
-            completeResponse();
-        });
+        saveButton.addActionListener(event -> completeResponse());
     }
 
     @Override
@@ -56,7 +54,7 @@ public class GoogleAuthWindow implements ResponsiveGUI {
     @Override
     public GuiResponse<String[]> getResponse() {
         this.pendingResponse = new CompletableFuture<GuiResponse<String[]>>();
-        GuiResponse<String[]> result = null;
+        GuiResponse<String[]> result;
         try {
             result = this.pendingResponse.get();
         } catch (CancellationException | InterruptedException | ExecutionException e) {
