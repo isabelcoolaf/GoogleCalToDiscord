@@ -55,5 +55,9 @@ public class GuiController {
         if (guiPanel != null) window.remove(guiPanel);
     }
 
+    public void destroy(){
+        window.dispose();
+    }
+
 
 }

@@ -22,6 +22,7 @@ public class GoogleCalToDiscord {
                 continue;
             }
             if (resp.status == GuiResponse.ResponseCode.WINDOW_CLOSED) {
+                controller.destroy();
                 return;
             }
             if (resp.status == GuiResponse.ResponseCode.CANCELLED) {
