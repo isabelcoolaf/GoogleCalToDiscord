@@ -24,11 +24,11 @@ import java.util.List;
 import java.util.Map;
 
 public class SlashCommandInteractions extends ListenerAdapter {
-    private Presence richPresence;
+    private final Presence richPresence;
     private com.google.api.services.calendar.model.Calendar curCalendar;
     private GoogleCalendarServiceHandler calHandler;
 
-    // Presence required so that commands can alter the data of the
+    // Presence required so that commands can alter the data of the activity
     public SlashCommandInteractions(Presence RP) {
         richPresence = RP;
     }
@@ -38,6 +38,7 @@ public class SlashCommandInteractions extends ListenerAdapter {
     public void setCurrentCalendar(com.google.api.services.calendar.model.Calendar googleCal){
         curCalendar = googleCal;
     }
+    public com.google.api.services.calendar.model.Calendar getCurCalendar() { return curCalendar; }
     @Override
     public void onSlashCommandInteraction(@NotNull SlashCommandInteractionEvent event) {
         System.out.println("Command used \"" + event.getName() + "\"");
