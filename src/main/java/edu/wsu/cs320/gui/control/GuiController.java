@@ -1,55 +1,62 @@
 package edu.wsu.cs320.gui.control;
 
+
 import javax.swing.*;
+
+import edu.wsu.cs320.gui.GoogleAuthWindow.GoogleAuthWindow;
 
 public class GuiController {
 
-    public enum StateEnum {
-        AUTH,
-        SELECT,
-        CUSTOMIZE
-    }
-
-    private StateEnum state;
-    private boolean guiSpawned = false;
-    private JFrame currentGUI = null;
+    private JFrame window;
+    ResponsiveGUI gui;
+    private JPanel guiPanel;
     // TODO: Make currentGUI its own class for JPanel management
 
     public GuiController() {
-        currentGUI = new JFrame();
-        currentGUI.setVisible(false);
+        window = new JFrame();
+        window.setVisible(false);
+        window.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
+        window.addWindowListener(new java.awt.event.WindowAdapter() {
+            @Override
+            public void windowClosing(java.awt.event.WindowEvent windowEvent) {
+                gui.onWindowClose();
+                closeGUI();
+            }
+        });
     }
 
-
-    public void changeState(StateEnum newState) {
-        if (guiSpawned) closeGUI();
-        state = newState;
-        if (guiSpawned) spawnGUI();
+    public GuiResponse<String[]> getAuthData() {
+        GoogleAuthWindow auth = new GoogleAuthWindow();
+        openGUI(auth);
+        GuiResponse<String[]> resp = new GuiResponse<>(GuiResponse.ResponseCode.WINDOW_CLOSED, null);
+        while (gui != null) {
+            resp = auth.getResponse();
+            if (resp.status != GuiResponse.ResponseCode.INCOMPLETE_DATA) break;
+            JOptionPane.showMessageDialog(
+                    window,
+                    "Please provide a key and client ID.",
+                    "Incomplete Input", JOptionPane.WARNING_MESSAGE);
+        }
+        closeGUI();
+        return resp;
     }
 
-    public StateEnum getState() {
-        return state;
+    private void openGUI(ResponsiveGUI newGui) {
+        gui = newGui;
+        guiPanel = gui.getGuiPanel();
+        window.setContentPane(guiPanel);
+        window.setSize(300, 150);
+        window.setLocationRelativeTo(null);
+        window.setVisible(true);
     }
 
-    public boolean hasGUIOpen() {
-        return guiSpawned;
+    private void closeGUI() {
+        window.setVisible(false);
+        if (guiPanel != null) window.remove(guiPanel);
     }
 
-    public void spawnGUI() {
-        //TODO: method should spawn GUI based on state
-        currentGUI.setVisible(true);
-        guiSpawned = true;
-    }
-
-    public void closeGUI() {
-        //TODO: method should destroy its given JPanel, assuming it has one
-        if (!guiSpawned) return;
-        currentGUI.setVisible(false);
-        guiSpawned = false;
-    }
-
-    public void freezeInput() {
-        //TODO: Lock user out of meaningful interaction with the GUI
+    public void destroy(){
+        window.dispose();
     }
 
 
