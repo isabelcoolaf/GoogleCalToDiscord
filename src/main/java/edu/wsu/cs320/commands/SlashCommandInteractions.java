@@ -27,6 +27,7 @@ public class SlashCommandInteractions extends ListenerAdapter {
     private final Presence richPresence;
     private com.google.api.services.calendar.model.Calendar curCalendar;
     private GoogleCalendarServiceHandler calHandler;
+    private static int eventCount;
 
     // Presence required so that commands can alter the data of the activity
     public SlashCommandInteractions(Presence RP) {
@@ -39,6 +40,7 @@ public class SlashCommandInteractions extends ListenerAdapter {
         curCalendar = googleCal;
     }
     public com.google.api.services.calendar.model.Calendar getCurCalendar() { return curCalendar; }
+
     @Override
     public void onSlashCommandInteraction(@NotNull SlashCommandInteractionEvent event) {
         System.out.println("Command used \"" + event.getName() + "\"");
@@ -70,6 +72,7 @@ public class SlashCommandInteractions extends ListenerAdapter {
                 event.reply("Changed presence type to: " + presenceResponse).setEphemeral(true).queue();
                 break;
 
+//                Fix these repeating events *Later
             case "show_next_event":
                 if (calHandler == null){
                     event.reply("Google Calendar not authenticated! Please sign in first.").setEphemeral(true).queue();
@@ -83,6 +86,24 @@ public class SlashCommandInteractions extends ListenerAdapter {
                         throw new RuntimeException(e);
                     }
                     event.reply("Next event: "+ events.get(0).toString()).setEphemeral(true).queue();
+                }
+            case "next_event":
+                if (calHandler == null){
+                    event.reply("Google Calendar not authenticated! Please sign in first.").setEphemeral(true).queue();
+                } else if (curCalendar == null) {
+                    event.reply("No calendar selected! Please select a calendar first.").setEphemeral(true).queue();
+                } else {
+                    List<Event> events;
+                    try {
+                        events = calHandler.getUpcomingEvents(curCalendar.getId());
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+                    eventCount++;
+                    event.reply("Event changed to: "+ events.get(eventCount).toString()).setEphemeral(true).queue();
+                    Activity activityState = richPresence.getActivityState();
+                    activityState.setDetails(events.get(0).toString());
+                    richPresence.setActivityState(activityState);
                 }
         }
     }

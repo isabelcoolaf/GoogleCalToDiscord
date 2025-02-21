@@ -42,13 +42,17 @@ public class DiscordInterface extends Thread{
 
     @Override
     public void run(){
+        if (Token == null || ID == null) {
+            System.out.println("Bot Token or Application Id was not supplied: will not run interface!");
+            return;
+        }
+
         Presence presence = new Presence(ID);
         commands = new SlashCommandInteractions(presence);
         setGoogleCalCredentials(manager, calHandler);
 
         // Bot token for using slash commands
-        String token = Token;
-        JDA bot = JDABuilder.createDefault(token)
+        JDA bot = JDABuilder.createDefault(Token)
                 .addEventListeners(commands)
                 .build();
 
