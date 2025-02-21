@@ -25,17 +25,21 @@ public class CalendarSelector implements ResponsiveGUI {
     private final ButtonGroup entryButtonGroup = new ButtonGroup();
     private CompletableFuture<GuiResponse<String>> pendingResponse;
 
+    public CalendarSelector() {
+        saveButton.addActionListener(event -> completeResponse());
+    }
+
     private void addButton(CalendarListEntry cal) {
         CalendarSelectorButton newEntry = new CalendarSelectorButton(cal);
         entryButtonGroup.add(newEntry);
     }
 
-    void feedCalendarList(CalendarList calList) {
+    public void feedCalendarList(CalendarList calList) {
         entryPanel.removeAll();
         for (CalendarListEntry entry : calList.getItems()) addButton(entry);
     }
 
-    public void completeResponse() {
+    private void completeResponse() {
         if (pendingResponse == null) return; // No response to complete
         CalendarSelectorButton selected = (CalendarSelectorButton) entryButtonGroup.getSelection();
         pendingResponse.complete(new GuiResponse<String>(GuiResponse.ResponseCode.OK, selected.calendar.getId()));
