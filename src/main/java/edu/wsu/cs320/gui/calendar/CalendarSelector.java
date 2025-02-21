@@ -8,25 +8,62 @@ import com.google.api.services.calendar.model.CalendarListEntry;
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.uiDesigner.core.Spacer;
+import edu.wsu.cs320.gui.control.GuiResponse;
 import edu.wsu.cs320.gui.control.ResponsiveGUI;
 
 import java.awt.*;
+import java.util.concurrent.CancellationException;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 
-public class CalendarSelector {
+public class CalendarSelector implements ResponsiveGUI {
     private JLabel selectCalendarLabel;
     public JPanel mainPanel;
+    private JButton saveButton;
     private JPanel entryPanel;
     private CalendarSelectorButton[] entries;
     private final ButtonGroup entryButtonGroup = new ButtonGroup();
+    private CompletableFuture<GuiResponse<String>> pendingResponse;
 
     private void addButton(CalendarListEntry cal) {
         CalendarSelectorButton newEntry = new CalendarSelectorButton(cal);
         entryButtonGroup.add(newEntry);
     }
 
-    void feedCalendarList(CalendarList cals) {
+    void feedCalendarList(CalendarList calList) {
         entryPanel.removeAll();
-        for (CalendarListEntry cal : cals.getItems()) addButton(cal);
+        for (CalendarListEntry entry : calList.getItems()) addButton(entry);
+    }
+
+    public void completeResponse() {
+        if (pendingResponse == null) return; // No response to complete
+        CalendarSelectorButton selected = (CalendarSelectorButton) entryButtonGroup.getSelection();
+        pendingResponse.complete(new GuiResponse<String>(GuiResponse.ResponseCode.OK, selected.calendar.getId()));
+    }
+
+
+    @Override
+    public JPanel getGuiPanel() {
+        return mainPanel;
+    }
+
+    @Override
+    public GuiResponse<String> getResponse() {
+        this.pendingResponse = new CompletableFuture<>();
+        GuiResponse<String> result;
+        try {
+            result = this.pendingResponse.get();
+        } catch (CancellationException | InterruptedException | ExecutionException e) {
+            return new GuiResponse<String>(GuiResponse.ResponseCode.CANCELLED, null);
+        }
+        return result;
+    }
+
+    @Override
+    public void onWindowClose() {
+        if (this.pendingResponse != null) {
+            pendingResponse.complete(new GuiResponse<String>(GuiResponse.ResponseCode.WINDOW_CLOSED, null));
+        }
     }
 
 
@@ -50,15 +87,15 @@ public class CalendarSelector {
         selectCalendarLabel = new JLabel();
         selectCalendarLabel.setText("Select a calendar:");
         mainPanel.add(selectCalendarLabel, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_NORTH, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-        entryPanel = new JPanel();
-        entryPanel.setLayout(new GridLayoutManager(1, 1, new Insets(0, 0, 0, 0), -1, -1));
-        mainPanel.add(entryPanel, new GridConstraints(1, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
+        final JScrollPane scrollPane1 = new JScrollPane();
+        mainPanel.add(scrollPane1, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
         final Spacer spacer1 = new Spacer();
-        entryPanel.add(spacer1, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1, GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
+        scrollPane1.setViewportView(spacer1);
         final Spacer spacer2 = new Spacer();
-        mainPanel.add(spacer2, new GridConstraints(1, 2, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
-        final Spacer spacer3 = new Spacer();
-        mainPanel.add(spacer3, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
+        mainPanel.add(spacer2, new GridConstraints(0, 2, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
+        saveButton = new JButton();
+        saveButton.setText("Save");
+        mainPanel.add(saveButton, new GridConstraints(1, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
     }
 
     /**
@@ -67,4 +104,5 @@ public class CalendarSelector {
     public JComponent $$$getRootComponent$$$() {
         return mainPanel;
     }
+
 }
