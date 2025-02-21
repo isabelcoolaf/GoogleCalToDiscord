@@ -36,11 +36,13 @@ public class CalendarSelector implements ResponsiveGUI {
     public void feedCalendarList(CalendarList calList) {
         entryPanel.removeAll();
         for (CalendarListEntry entry : calList.getItems()) addButton(entry);
+        entryButtonGroup.clearSelection();
     }
 
     private void completeResponse() {
         if (pendingResponse == null) return; // No response to complete
         CalendarSelectorButton selected = (CalendarSelectorButton) entryButtonGroup.getSelection();
+        if (selected == null) return; // Can't complete response if nothing selected
         pendingResponse.complete(new GuiResponse<String>(GuiResponse.ResponseCode.OK, selected.calendar.getId()));
     }
 
