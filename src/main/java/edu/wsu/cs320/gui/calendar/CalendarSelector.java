@@ -2,7 +2,6 @@ package edu.wsu.cs320.gui.calendar;
 
 import javax.swing.*;
 
-import com.google.api.services.calendar.model.Calendar;
 import com.google.api.services.calendar.model.CalendarList;
 import com.google.api.services.calendar.model.CalendarListEntry;
 import com.intellij.uiDesigner.core.GridConstraints;
@@ -19,14 +18,14 @@ import java.util.concurrent.ExecutionException;
 public class CalendarSelector implements ResponsiveGUI {
     private JLabel selectCalendarLabel;
     public JPanel mainPanel;
-    private JButton saveButton;
+    private JButton confirmButton;
     private JPanel entryPanel;
     private CalendarSelectorButton[] entries;
     private final ButtonGroup entryButtonGroup = new ButtonGroup();
     private CompletableFuture<GuiResponse<String>> pendingResponse;
 
     public CalendarSelector() {
-        saveButton.addActionListener(event -> completeResponse());
+        confirmButton.addActionListener(event -> completeResponse());
     }
 
     private void addButton(CalendarListEntry cal) {
@@ -97,9 +96,9 @@ public class CalendarSelector implements ResponsiveGUI {
         scrollPane1.setViewportView(spacer1);
         final Spacer spacer2 = new Spacer();
         mainPanel.add(spacer2, new GridConstraints(0, 2, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
-        saveButton = new JButton();
-        saveButton.setText("Save");
-        mainPanel.add(saveButton, new GridConstraints(1, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        confirmButton = new JButton();
+        confirmButton.setText("Confirm");
+        mainPanel.add(confirmButton, new GridConstraints(1, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
     }
 
     /**
