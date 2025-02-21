@@ -3,7 +3,11 @@ package edu.wsu.cs320.gui.control;
 
 import javax.swing.*;
 
+import com.google.api.services.calendar.model.CalendarList;
+import com.google.gson.JsonElement;
 import edu.wsu.cs320.gui.GoogleAuthWindow.GoogleAuthWindow;
+import edu.wsu.cs320.gui.calendar.CalendarSelector;
+import edu.wsu.cs320.gui.calendar.CalendarSelectorButton;
 
 public class GuiController {
 
@@ -41,6 +45,15 @@ public class GuiController {
         return resp;
     }
 
+    public GuiResponse<String> getCalendarFromList(CalendarList cals) {
+        CalendarSelector selector = new CalendarSelector();
+        selector.feedCalendarList(cals);
+        GuiResponse<String> resp = selector.getResponse();
+        closeGUI();
+        return resp;
+    }
+
+
     private void openGUI(ResponsiveGUI newGui) {
         gui = newGui;
         guiPanel = gui.getGuiPanel();
@@ -55,7 +68,7 @@ public class GuiController {
         if (guiPanel != null) window.remove(guiPanel);
     }
 
-    public void destroy(){
+    public void destroy() {
         window.dispose();
     }
 

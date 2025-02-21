@@ -1,13 +1,14 @@
 package edu.wsu.cs320.gui.calendar;
 
 import com.google.api.services.calendar.model.Calendar;
+import com.google.api.services.calendar.model.CalendarListEntry;
 
 import javax.swing.JRadioButton;
 
 public class CalendarSelectorButton extends JRadioButton {
-    public Calendar calendar;
+    public CalendarListEntry calendar;
 
-    public CalendarSelectorButton(Calendar cal) {
+    public CalendarSelectorButton(CalendarListEntry cal) {
         this.calendar = cal;
         this.setText(cal.getSummary());
         this.setToolTipText(cal.getDescription());
