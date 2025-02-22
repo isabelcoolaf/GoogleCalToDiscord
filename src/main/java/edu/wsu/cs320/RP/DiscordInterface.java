@@ -1,5 +1,6 @@
 package edu.wsu.cs320.RP;
 
+import com.google.api.services.calendar.model.Calendar;
 import edu.wsu.cs320.commands.SlashCommandInteractions;
 import edu.wsu.cs320.googleapi.GoogleCalendarServiceHandler;
 import edu.wsu.cs320.googleapi.GoogleOAuthManager;
@@ -26,13 +27,13 @@ public class DiscordInterface extends Thread{
         }
     }
 
-    public void setCurCalendar(com.google.api.services.calendar.model.Calendar googleCal){
+    public void setCurCalendar(Calendar googleCal){
         if (commands != null){
             commands.setCurrentCalendar(googleCal);
         }
     }
 
-    public com.google.api.services.calendar.model.Calendar getCurCalendar(){
+    public Calendar getCurCalendar(){
         if (commands != null){
             return commands.getCurCalendar();
         }
