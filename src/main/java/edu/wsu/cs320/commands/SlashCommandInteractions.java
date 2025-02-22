@@ -92,6 +92,7 @@ public class SlashCommandInteractions extends ListenerAdapter {
                     }
                     event.reply("Next event: "+ events.get(0).toString()).setEphemeral(true).queue();
                 }
+                break;
             case "next_event":
                 if (calHandler == null){
                     event.reply("Google Calendar not authenticated! Please sign in first.").setEphemeral(true).queue();
@@ -110,6 +111,7 @@ public class SlashCommandInteractions extends ListenerAdapter {
                     activityState.setDetails(events.get(0).toString());
                     richPresence.setActivityState(activityState);
                 }
+                break;
         }
     }
 
