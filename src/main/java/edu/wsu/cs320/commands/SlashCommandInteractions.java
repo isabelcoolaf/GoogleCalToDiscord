@@ -24,11 +24,12 @@ import java.util.List;
 import java.util.Map;
 
 public class SlashCommandInteractions extends ListenerAdapter {
-    private Presence richPresence;
+    private final Presence richPresence;
     private com.google.api.services.calendar.model.Calendar curCalendar;
     private GoogleCalendarServiceHandler calHandler;
+    private static int eventCount;
 
-    // Presence required so that commands can alter the data of the
+    // Presence required so that commands can alter the data of the activity
     public SlashCommandInteractions(Presence RP) {
         richPresence = RP;
     }
@@ -38,6 +39,8 @@ public class SlashCommandInteractions extends ListenerAdapter {
     public void setCurrentCalendar(com.google.api.services.calendar.model.Calendar googleCal){
         curCalendar = googleCal;
     }
+    public com.google.api.services.calendar.model.Calendar getCurCalendar() { return curCalendar; }
+
     @Override
     public void onSlashCommandInteraction(@NotNull SlashCommandInteractionEvent event) {
         System.out.println("Command used \"" + event.getName() + "\"");
@@ -45,6 +48,9 @@ public class SlashCommandInteractions extends ListenerAdapter {
             case "command_example":
                 OptionMapping options = event.getOption("insert_option_name");
                 String response = options.getAsString();
+
+                Activity activity2 = richPresence.getActivityState();
+                richPresence.setTimeBar(activity2, Long.parseLong(response));
 
                 event.reply("reply to command with option: " + response).setEphemeral(true).queue();
                 break;
@@ -58,10 +64,11 @@ public class SlashCommandInteractions extends ListenerAdapter {
                 activityTypes.put("Playing", ActivityType.PLAYING);
                 activityTypes.put("Watching", ActivityType.WATCHING);
                 activityTypes.put("Listening", ActivityType.LISTENING);
-                activityTypes.put("Streaming", ActivityType.STREAMING);
+//                activityTypes.put("Streaming", ActivityType.STREAMING); May be reserved / not usable
                 activityTypes.put("Competing", ActivityType.COMPETING);
 
                 ActivityType type = activityTypes.get(presenceResponse);
+                System.out.println(type);
                 activity.setType(type);
 
                 richPresence.setActivityState(activity);
@@ -69,6 +76,7 @@ public class SlashCommandInteractions extends ListenerAdapter {
                 event.reply("Changed presence type to: " + presenceResponse).setEphemeral(true).queue();
                 break;
 
+//                Fix these repeating events *Later
             case "show_next_event":
                 if (calHandler == null){
                     event.reply("Google Calendar not authenticated! Please sign in first.").setEphemeral(true).queue();
@@ -82,6 +90,24 @@ public class SlashCommandInteractions extends ListenerAdapter {
                         throw new RuntimeException(e);
                     }
                     event.reply("Next event: "+ events.get(0).toString()).setEphemeral(true).queue();
+                }
+            case "next_event":
+                if (calHandler == null){
+                    event.reply("Google Calendar not authenticated! Please sign in first.").setEphemeral(true).queue();
+                } else if (curCalendar == null) {
+                    event.reply("No calendar selected! Please select a calendar first.").setEphemeral(true).queue();
+                } else {
+                    List<Event> events;
+                    try {
+                        events = calHandler.getUpcomingEvents(curCalendar.getId());
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+                    eventCount++;
+                    event.reply("Event changed to: "+ events.get(eventCount).toString()).setEphemeral(true).queue();
+                    Activity activityState = richPresence.getActivityState();
+                    activityState.setDetails(events.get(0).toString());
+                    richPresence.setActivityState(activityState);
                 }
         }
     }
@@ -97,7 +123,7 @@ public class SlashCommandInteractions extends ListenerAdapter {
         OptionData option_example = new OptionData(OptionType.STRING, "insert_option_name", "insert_description", true);
 
         OptionData PresenceType = new OptionData(OptionType.STRING, "presence_type", "Select the presence type", true);
-        String[] choices = {"Playing", "Watching", "Listening", "Streaming", "Competing"};
+        String[] choices = {"Playing", "Watching", "Listening", "Competing"};
         for (String choice : choices) {
             PresenceType.addChoice(choice, choice);
         }

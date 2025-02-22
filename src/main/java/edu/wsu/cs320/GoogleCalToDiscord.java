@@ -1,5 +1,6 @@
 package edu.wsu.cs320;
 
+import edu.wsu.cs320.googleapi.GoogleCalendarServiceHandler;
 import edu.wsu.cs320.googleapi.GoogleOAuthManager;
 import edu.wsu.cs320.gui.control.GuiController;
 import edu.wsu.cs320.gui.control.GuiResponse;
@@ -14,6 +15,9 @@ public class GoogleCalToDiscord {
 
         JFrame frame = new JFrame("Google Auth Window");
         GuiController controller = new GuiController();
+
+        DiscordInterface discordInterface = new DiscordInterface(null,null);
+        discordInterface.start();
 
         GuiResponse<String[]> resp;
         while (true) {
@@ -41,8 +45,6 @@ public class GoogleCalToDiscord {
             // the function also blocks until complete, so keep that in mind
         }
 
-        DiscordInterface discordInterface = new DiscordInterface("Application ID","Bot Token");
-        discordInterface.start();
     }
 
 }
