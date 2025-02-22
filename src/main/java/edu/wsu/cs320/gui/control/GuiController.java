@@ -1,13 +1,10 @@
 package edu.wsu.cs320.gui.control;
 
-
 import javax.swing.*;
 
 import com.google.api.services.calendar.model.CalendarList;
-import com.google.gson.JsonElement;
 import edu.wsu.cs320.gui.GoogleAuthWindow.GoogleAuthWindow;
 import edu.wsu.cs320.gui.calendar.CalendarSelector;
-import edu.wsu.cs320.gui.calendar.CalendarSelectorButton;
 
 public class GuiController {
 

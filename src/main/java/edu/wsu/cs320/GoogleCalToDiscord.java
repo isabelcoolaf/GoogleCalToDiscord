@@ -1,13 +1,11 @@
 package edu.wsu.cs320;
 
-import edu.wsu.cs320.googleapi.GoogleCalendarServiceHandler;
 import edu.wsu.cs320.googleapi.GoogleOAuthManager;
 import edu.wsu.cs320.gui.control.GuiController;
 import edu.wsu.cs320.gui.control.GuiResponse;
 import edu.wsu.cs320.RP.DiscordInterface;
 
 import javax.swing.*;
-import java.util.Arrays;
 
 public class GoogleCalToDiscord {
 
