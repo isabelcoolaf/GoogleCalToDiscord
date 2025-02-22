@@ -16,10 +16,14 @@ public class GoogleAuthWindow implements ResponsiveGUI {
     public JPanel mainPanel;
     private JButton saveButton;
     private JPanel centerPanel;
-    private JLabel ifLabel;
-    private JTextField idField;
-    private JLabel secretLabel;
-    private JTextField secretField;
+    private JLabel googleIdLabel;
+    private JTextField googleIdField;
+    private JLabel googleSecretLabel;
+    private JTextField googleSecretField;
+    private JTextField discordIdField;
+    private JTextField discordTokenField;
+    private JLabel discordIdLabel;
+    private JLabel discordTokenLabel;
     private CompletableFuture<GuiResponse<String[]>> pendingResponse;
 
     public GoogleAuthWindow() {
@@ -36,16 +40,20 @@ public class GoogleAuthWindow implements ResponsiveGUI {
         System.out.println("Checking if response exists...");
         if (pendingResponse == null) return; // No response to complete
         System.out.println("Completing Response...");
-        String[] dataPacket = new String[2];
-        String id = idField.getText();
-        String secret = secretField.getText();
-        if (id.isEmpty() || secret.isEmpty()) {
+        String[] dataPacket = new String[4];
+        String googleClientID = googleIdField.getText();
+        String googleClientSecret = googleSecretField.getText();
+        String discordClientID = discordIdField.getText();
+        String discordBotToken = discordTokenField.getText();
+        if (googleClientID.isEmpty() || googleClientSecret.isEmpty() || discordClientID.isEmpty() || discordBotToken.isEmpty()) {
             pendingResponse.complete(
                     new GuiResponse<String[]>(GuiResponse.ResponseCode.INCOMPLETE_DATA, null)
             );
         }
-        dataPacket[0] = idField.getText();
-        dataPacket[1] = secretField.getText();
+        dataPacket[0] = googleIdField.getText();
+        dataPacket[1] = googleSecretField.getText();
+        dataPacket[2] = discordIdField.getText();
+        dataPacket[3] = discordTokenField.getText();
         pendingResponse.complete(
                 new GuiResponse<String[]>(GuiResponse.ResponseCode.OK, dataPacket)
         );
@@ -88,22 +96,33 @@ public class GoogleAuthWindow implements ResponsiveGUI {
         mainPanel = new JPanel();
         mainPanel.setLayout(new GridLayoutManager(1, 1, new Insets(10, 10, 10, 10), -1, -1));
         centerPanel = new JPanel();
-        centerPanel.setLayout(new GridLayoutManager(3, 3, new Insets(0, 0, 0, 0), 0, 0));
+        centerPanel.setLayout(new GridLayoutManager(5, 3, new Insets(0, 0, 0, 0), 0, 0));
         mainPanel.add(centerPanel, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 1, false));
         centerPanel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0), null, TitledBorder.DEFAULT_JUSTIFICATION, TitledBorder.DEFAULT_POSITION, null, null));
         saveButton = new JButton();
         saveButton.setText("Save");
-        centerPanel.add(saveButton, new GridConstraints(2, 1, 1, 2, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-        secretField = new JTextField();
-        centerPanel.add(secretField, new GridConstraints(1, 2, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-        secretLabel = new JLabel();
-        secretLabel.setText("Google Client Secret: ");
-        centerPanel.add(secretLabel, new GridConstraints(1, 1, 1, 1, GridConstraints.ANCHOR_EAST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-        idField = new JTextField();
-        centerPanel.add(idField, new GridConstraints(0, 2, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-        ifLabel = new JLabel();
-        ifLabel.setText("Google Client ID: ");
-        centerPanel.add(ifLabel, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_EAST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        centerPanel.add(saveButton, new GridConstraints(4, 1, 1, 2, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        googleSecretField = new JTextField();
+        centerPanel.add(googleSecretField, new GridConstraints(1, 2, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        googleSecretLabel = new JLabel();
+        googleSecretLabel.setText("Google Client Secret: ");
+        centerPanel.add(googleSecretLabel, new GridConstraints(1, 1, 1, 1, GridConstraints.ANCHOR_EAST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        googleIdField = new JTextField();
+        centerPanel.add(googleIdField, new GridConstraints(0, 2, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        googleIdLabel = new JLabel();
+        googleIdLabel.setText("Google Client ID: ");
+        centerPanel.add(googleIdLabel, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_EAST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        discordIdField = new JTextField();
+        centerPanel.add(discordIdField, new GridConstraints(2, 2, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        discordIdLabel = new JLabel();
+        discordIdLabel.setText("Discord Client ID: ");
+        centerPanel.add(discordIdLabel, new GridConstraints(2, 1, 1, 1, GridConstraints.ANCHOR_EAST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        discordTokenLabel = new JLabel();
+        discordTokenLabel.setText("Discord Bot Token: ");
+        discordTokenLabel.setVerticalTextPosition(0);
+        centerPanel.add(discordTokenLabel, new GridConstraints(3, 1, 1, 1, GridConstraints.ANCHOR_EAST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        discordTokenField = new JTextField();
+        centerPanel.add(discordTokenField, new GridConstraints(3, 2, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
     }
 
     /**

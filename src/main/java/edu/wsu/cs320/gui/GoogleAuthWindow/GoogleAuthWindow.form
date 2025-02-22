@@ -3,12 +3,12 @@
   <grid id="27dc6" binding="mainPanel" layout-manager="GridLayoutManager" row-count="1" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
     <margin top="10" left="10" bottom="10" right="10"/>
     <constraints>
-      <xy x="20" y="20" width="423" height="130"/>
+      <xy x="20" y="20" width="423" height="198"/>
     </constraints>
     <properties/>
     <border type="none"/>
     <children>
-      <grid id="f0432" binding="centerPanel" layout-manager="GridLayoutManager" row-count="3" column-count="3" same-size-horizontally="false" same-size-vertically="false" hgap="0" vgap="0">
+      <grid id="f0432" binding="centerPanel" layout-manager="GridLayoutManager" row-count="5" column-count="3" same-size-horizontally="false" same-size-vertically="false" hgap="0" vgap="0">
         <margin top="0" left="0" bottom="0" right="0"/>
         <constraints>
           <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="1" use-parent-layout="false"/>
@@ -20,19 +20,19 @@
         <children>
           <component id="87536" class="javax.swing.JButton" binding="saveButton">
             <constraints>
-              <grid row="2" column="1" row-span="1" col-span="2" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+              <grid row="4" column="1" row-span="1" col-span="2" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
             </constraints>
             <properties>
               <text value="Save"/>
             </properties>
           </component>
-          <component id="806b7" class="javax.swing.JTextField" binding="secretField">
+          <component id="806b7" class="javax.swing.JTextField" binding="googleSecretField">
             <constraints>
               <grid row="1" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
             </constraints>
             <properties/>
           </component>
-          <component id="43019" class="javax.swing.JLabel" binding="secretLabel">
+          <component id="43019" class="javax.swing.JLabel" binding="googleSecretLabel">
             <constraints>
               <grid row="1" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="4" fill="0" indent="0" use-parent-layout="false"/>
             </constraints>
@@ -40,19 +40,48 @@
               <text value="Google Client Secret: "/>
             </properties>
           </component>
-          <component id="f5a41" class="javax.swing.JTextField" binding="idField">
+          <component id="f5a41" class="javax.swing.JTextField" binding="googleIdField">
             <constraints>
               <grid row="0" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
             </constraints>
             <properties/>
           </component>
-          <component id="3b35a" class="javax.swing.JLabel" binding="ifLabel">
+          <component id="3b35a" class="javax.swing.JLabel" binding="googleIdLabel">
             <constraints>
               <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="4" fill="0" indent="0" use-parent-layout="false"/>
             </constraints>
             <properties>
               <text value="Google Client ID: "/>
             </properties>
+          </component>
+          <component id="c51b2" class="javax.swing.JTextField" binding="discordIdField">
+            <constraints>
+              <grid row="2" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
+            </constraints>
+            <properties/>
+          </component>
+          <component id="4df10" class="javax.swing.JLabel" binding="discordIdLabel">
+            <constraints>
+              <grid row="2" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="4" fill="0" indent="0" use-parent-layout="false"/>
+            </constraints>
+            <properties>
+              <text value="Discord Client ID: "/>
+            </properties>
+          </component>
+          <component id="d769c" class="javax.swing.JLabel" binding="discordTokenLabel">
+            <constraints>
+              <grid row="3" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="4" fill="0" indent="0" use-parent-layout="false"/>
+            </constraints>
+            <properties>
+              <text value="Discord Bot Token: "/>
+              <verticalTextPosition value="0"/>
+            </properties>
+          </component>
+          <component id="79cd4" class="javax.swing.JTextField" binding="discordTokenField">
+            <constraints>
+              <grid row="3" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
+            </constraints>
+            <properties/>
           </component>
         </children>
       </grid>

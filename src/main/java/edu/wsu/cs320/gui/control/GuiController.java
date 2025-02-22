@@ -35,7 +35,7 @@ public class GuiController {
             if (resp.status != GuiResponse.ResponseCode.INCOMPLETE_DATA) break;
             JOptionPane.showMessageDialog(
                     window,
-                    "Please provide a key and client ID.",
+                    "Please fill in all fields.",
                     "Incomplete Input", JOptionPane.WARNING_MESSAGE);
         }
         closeGUI();
@@ -55,7 +55,7 @@ public class GuiController {
         gui = newGui;
         guiPanel = gui.getGuiPanel();
         window.setContentPane(guiPanel);
-        window.setSize(300, 150);
+        window.setSize(300, 200);
         window.setLocationRelativeTo(null);
         window.setVisible(true);
     }
