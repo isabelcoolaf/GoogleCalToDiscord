@@ -49,6 +49,9 @@ public class SlashCommandInteractions extends ListenerAdapter {
                 OptionMapping options = event.getOption("insert_option_name");
                 String response = options.getAsString();
 
+                Activity activity2 = richPresence.getActivityState();
+                richPresence.setTimeBar(activity2, Long.parseLong(response));
+
                 event.reply("reply to command with option: " + response).setEphemeral(true).queue();
                 break;
             case "presence_type":
@@ -61,10 +64,11 @@ public class SlashCommandInteractions extends ListenerAdapter {
                 activityTypes.put("Playing", ActivityType.PLAYING);
                 activityTypes.put("Watching", ActivityType.WATCHING);
                 activityTypes.put("Listening", ActivityType.LISTENING);
-                activityTypes.put("Streaming", ActivityType.STREAMING);
+//                activityTypes.put("Streaming", ActivityType.STREAMING); May be reserved / not usable
                 activityTypes.put("Competing", ActivityType.COMPETING);
 
                 ActivityType type = activityTypes.get(presenceResponse);
+                System.out.println(type);
                 activity.setType(type);
 
                 richPresence.setActivityState(activity);
@@ -119,7 +123,7 @@ public class SlashCommandInteractions extends ListenerAdapter {
         OptionData option_example = new OptionData(OptionType.STRING, "insert_option_name", "insert_description", true);
 
         OptionData PresenceType = new OptionData(OptionType.STRING, "presence_type", "Select the presence type", true);
-        String[] choices = {"Playing", "Watching", "Listening", "Streaming", "Competing"};
+        String[] choices = {"Playing", "Watching", "Listening", "Competing"};
         for (String choice : choices) {
             PresenceType.addChoice(choice, choice);
         }

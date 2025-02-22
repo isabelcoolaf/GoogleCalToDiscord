@@ -26,6 +26,15 @@ public class Presence {
         updater.activityManager().updateActivity(RP);
     }
 
+    // Takes a time in milliseconds and displays a time bar
+    public void setTimeBar(Activity activity, long time){
+        long startTime = Instant.now().toEpochMilli();
+        long endTime = startTime + time;
+        activity.timestamps().setStart(Instant.ofEpochSecond(startTime));
+        activity.timestamps().setEnd(Instant.ofEpochSecond(endTime));
+        updater.activityManager().updateActivity(RP);
+    }
+
     public void Activity() throws IOException{
 
         // application ID
