@@ -1,5 +1,6 @@
 package edu.wsu.cs320.commands;
 
+import com.google.api.services.calendar.model.Calendar;
 import com.google.api.services.calendar.model.Event;
 import de.jcm.discordgamesdk.activity.Activity;
 import de.jcm.discordgamesdk.activity.ActivityType;
@@ -25,7 +26,7 @@ import java.util.Map;
 
 public class SlashCommandInteractions extends ListenerAdapter {
     private final Presence richPresence;
-    private com.google.api.services.calendar.model.Calendar curCalendar;
+    private Calendar curCalendar;
     private GoogleCalendarServiceHandler calHandler;
     private static int eventCount;
 
@@ -36,10 +37,10 @@ public class SlashCommandInteractions extends ListenerAdapter {
     public void setGoogleCalendarHandler(GoogleCalendarServiceHandler handler){
         calHandler = handler;
     }
-    public void setCurrentCalendar(com.google.api.services.calendar.model.Calendar googleCal){
+    public void setCurrentCalendar(Calendar googleCal){
         curCalendar = googleCal;
     }
-    public com.google.api.services.calendar.model.Calendar getCurCalendar() { return curCalendar; }
+    public Calendar getCurCalendar() { return curCalendar; }
 
     @Override
     public void onSlashCommandInteraction(@NotNull SlashCommandInteractionEvent event) {
