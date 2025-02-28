@@ -15,9 +15,15 @@ import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
+/**
+ * Allows the user to select a calendar from a given list.
+ *
+ * @see CalendarList
+ * @see CalendarListEntry
+ */
 public class CalendarSelector implements ResponsiveGUI {
     private JLabel selectCalendarLabel;
-    public JPanel mainPanel;
+    private JPanel mainPanel;
     private JButton confirmButton;
     private JPanel entryPanel;
     private CalendarSelectorButton[] entries;
@@ -33,6 +39,12 @@ public class CalendarSelector implements ResponsiveGUI {
         entryButtonGroup.add(newEntry);
     }
 
+    /**
+     * Fill the window with CalendarSelectorButtons for each entry in the CalendarList.
+     *
+     * @param calList The list of calendars to display.
+     * @see CalendarSelectorButton
+     */
     public void feedCalendarList(CalendarList calList) {
         entryPanel.removeAll();
         for (CalendarListEntry entry : calList.getItems()) addButton(entry);
@@ -52,6 +64,12 @@ public class CalendarSelector implements ResponsiveGUI {
         return mainPanel;
     }
 
+    /**
+     * Request a calendar be selected from the window, blocking the thread until a response is received.
+     *
+     * @return If the response was successful, returns a GuiResponse with code OK and a dataPacket field of the selected calendar.
+     * Otherwise, returns a GuiResponse with a different code and a null dataPacket.
+     */
     @Override
     public GuiResponse<CalendarListEntry> getResponse() {
         this.pendingResponse = new CompletableFuture<>();

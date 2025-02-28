@@ -8,13 +8,19 @@ import edu.wsu.cs320.gui.GoogleAuthWindow.AuthWindow;
 import edu.wsu.cs320.gui.calendar.CalendarSelector;
 import edu.wsu.cs320.gui.calendar.CalendarSelectorButton;
 
+/**
+ * Controls the creation, destruction, and display of ResponsiveGUIs used to gather input from the user.
+ *
+ * @see GuiResponse
+ * @see ResponsiveGUI
+ */
 public class GuiController {
 
-    private JFrame window;
-    ResponsiveGUI gui;
+    private final JFrame window;
+    private ResponsiveGUI gui;
     private JPanel guiPanel;
-    // TODO: Make currentGUI its own class for JPanel management
 
+    /** Create a new controller with its window hidden. */
     public GuiController() {
         window = new JFrame();
         window.setVisible(false);
@@ -28,6 +34,13 @@ public class GuiController {
         });
     }
 
+    /**
+     * Displays a GUI that collects authentication data.<br>
+     * Closes after getting a response. Make sure to check the response code before using the data.
+     *
+     * @see GuiResponse
+     * @see AuthWindow
+     */
     public GuiResponse<String[]> getAuthData() {
         AuthWindow auth = new AuthWindow();
         openGUI(auth);
@@ -35,15 +48,18 @@ public class GuiController {
         while (gui != null) {
             resp = auth.getResponse();
             if (resp.status != GuiResponse.ResponseCode.INCOMPLETE_DATA) break;
-            JOptionPane.showMessageDialog(
-                    window,
-                    "Please fill in all fields.",
-                    "Incomplete Input", JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(window, "Please fill in all fields.", "Incomplete Input", JOptionPane.WARNING_MESSAGE);
         }
         closeGUI();
         return resp;
     }
 
+    /**
+     * Display a GUI that allows the user to select a calendar from the given list.<br>
+     * Closes after getting a response. Make sure to check the response code before using the data.
+     *
+     * @param cals The list of calendars to display to the user
+     */
     public GuiResponse<CalendarListEntry> getCalendarFromList(CalendarList cals) {
         CalendarSelector selector = new CalendarSelector();
         selector.feedCalendarList(cals);
@@ -67,6 +83,7 @@ public class GuiController {
         if (guiPanel != null) window.remove(guiPanel);
     }
 
+    /** Destroy the window of the GuiController. The controller should not be used after this. */
     public void destroy() {
         window.dispose();
     }
