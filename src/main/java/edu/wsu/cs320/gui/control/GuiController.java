@@ -3,7 +3,7 @@ package edu.wsu.cs320.gui.control;
 import javax.swing.*;
 
 import com.google.api.services.calendar.model.CalendarList;
-import edu.wsu.cs320.gui.GoogleAuthWindow.GoogleAuthWindow;
+import edu.wsu.cs320.gui.GoogleAuthWindow.AuthWindow;
 import edu.wsu.cs320.gui.calendar.CalendarSelector;
 
 public class GuiController {
@@ -27,7 +27,7 @@ public class GuiController {
     }
 
     public GuiResponse<String[]> getAuthData() {
-        GoogleAuthWindow auth = new GoogleAuthWindow();
+        AuthWindow auth = new AuthWindow();
         openGUI(auth);
         GuiResponse<String[]> resp = new GuiResponse<>(GuiResponse.ResponseCode.WINDOW_CLOSED, null);
         while (gui != null) {

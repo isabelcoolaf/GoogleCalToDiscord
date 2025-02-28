@@ -12,7 +12,7 @@ import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
-public class GoogleAuthWindow implements ResponsiveGUI {
+public class AuthWindow implements ResponsiveGUI {
     public JPanel mainPanel;
     private JButton saveButton;
     private JPanel centerPanel;
@@ -26,7 +26,7 @@ public class GoogleAuthWindow implements ResponsiveGUI {
     private JLabel discordTokenLabel;
     private CompletableFuture<GuiResponse<String[]>> pendingResponse;
 
-    public GoogleAuthWindow() {
+    public AuthWindow() {
         saveButton.addActionListener(event -> completeResponse());
     }
 
