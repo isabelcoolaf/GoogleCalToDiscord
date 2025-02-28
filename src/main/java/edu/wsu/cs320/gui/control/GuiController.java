@@ -4,9 +4,8 @@ import javax.swing.*;
 
 import com.google.api.services.calendar.model.CalendarList;
 import com.google.api.services.calendar.model.CalendarListEntry;
-import edu.wsu.cs320.gui.GoogleAuthWindow.AuthWindow;
+import edu.wsu.cs320.gui.auth.AuthForm;
 import edu.wsu.cs320.gui.calendar.CalendarSelector;
-import edu.wsu.cs320.gui.calendar.CalendarSelectorButton;
 
 /**
  * Controls the creation, destruction, and display of ResponsiveGUIs used to gather input from the user.
@@ -39,10 +38,10 @@ public class GuiController {
      * Closes after getting a response. Make sure to check the response code before using the data.
      *
      * @see GuiResponse
-     * @see AuthWindow
+     * @see AuthForm
      */
     public GuiResponse<String[]> getAuthData() {
-        AuthWindow auth = new AuthWindow();
+        AuthForm auth = new AuthForm();
         openGUI(auth);
         GuiResponse<String[]> resp = new GuiResponse<>(GuiResponse.ResponseCode.WINDOW_CLOSED, null);
         while (gui != null) {

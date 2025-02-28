@@ -1,4 +1,4 @@
-package edu.wsu.cs320.gui.GoogleAuthWindow;
+package edu.wsu.cs320.gui.auth;
 
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
@@ -15,7 +15,7 @@ import java.util.concurrent.ExecutionException;
 /**
  * The AuthWindow is a window that allows the user to type in authentication data necessary for running the program.
  */
-public class AuthWindow implements ResponsiveGUI {
+public class AuthForm implements ResponsiveGUI {
     public JPanel mainPanel;
     private JButton saveButton;
     private JPanel centerPanel;
@@ -30,7 +30,7 @@ public class AuthWindow implements ResponsiveGUI {
     private CompletableFuture<GuiResponse<String[]>> pendingResponse;
 
 
-    public AuthWindow() {
+    public AuthForm() {
         saveButton.addActionListener(event -> completeResponse());
     }
 
