@@ -3,8 +3,10 @@ package edu.wsu.cs320.gui.control;
 import javax.swing.*;
 
 import com.google.api.services.calendar.model.CalendarList;
+import com.google.api.services.calendar.model.CalendarListEntry;
 import edu.wsu.cs320.gui.GoogleAuthWindow.AuthWindow;
 import edu.wsu.cs320.gui.calendar.CalendarSelector;
+import edu.wsu.cs320.gui.calendar.CalendarSelectorButton;
 
 public class GuiController {
 
@@ -42,10 +44,10 @@ public class GuiController {
         return resp;
     }
 
-    public GuiResponse<String> getCalendarFromList(CalendarList cals) {
+    public GuiResponse<CalendarListEntry> getCalendarFromList(CalendarList cals) {
         CalendarSelector selector = new CalendarSelector();
         selector.feedCalendarList(cals);
-        GuiResponse<String> resp = selector.getResponse();
+        GuiResponse<CalendarListEntry> resp = selector.getResponse();
         closeGUI();
         return resp;
     }

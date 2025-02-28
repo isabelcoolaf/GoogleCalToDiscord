@@ -22,7 +22,7 @@ public class CalendarSelector implements ResponsiveGUI {
     private JPanel entryPanel;
     private CalendarSelectorButton[] entries;
     private final ButtonGroup entryButtonGroup = new ButtonGroup();
-    private CompletableFuture<GuiResponse<String>> pendingResponse;
+    private CompletableFuture<GuiResponse<CalendarListEntry>> pendingResponse;
 
     public CalendarSelector() {
         confirmButton.addActionListener(event -> completeResponse());
@@ -43,7 +43,7 @@ public class CalendarSelector implements ResponsiveGUI {
         if (pendingResponse == null) return; // No response to complete
         CalendarSelectorButton selected = (CalendarSelectorButton) entryButtonGroup.getSelection();
         if (selected == null) return; // Can't complete response if nothing selected
-        pendingResponse.complete(new GuiResponse<String>(GuiResponse.ResponseCode.OK, selected.calendar.getId()));
+        pendingResponse.complete(new GuiResponse<CalendarListEntry>(GuiResponse.ResponseCode.OK, selected.calendar));
     }
 
 
@@ -53,13 +53,13 @@ public class CalendarSelector implements ResponsiveGUI {
     }
 
     @Override
-    public GuiResponse<String> getResponse() {
+    public GuiResponse<CalendarListEntry> getResponse() {
         this.pendingResponse = new CompletableFuture<>();
-        GuiResponse<String> result;
+        GuiResponse<CalendarListEntry> result;
         try {
             result = this.pendingResponse.get();
         } catch (CancellationException | InterruptedException | ExecutionException e) {
-            return new GuiResponse<String>(GuiResponse.ResponseCode.CANCELLED, null);
+            return new GuiResponse<CalendarListEntry>(GuiResponse.ResponseCode.CANCELLED, null);
         }
         return result;
     }
@@ -67,7 +67,7 @@ public class CalendarSelector implements ResponsiveGUI {
     @Override
     public void onWindowClose() {
         if (this.pendingResponse != null) {
-            pendingResponse.complete(new GuiResponse<String>(GuiResponse.ResponseCode.WINDOW_CLOSED, null));
+            pendingResponse.complete(new GuiResponse<CalendarListEntry>(GuiResponse.ResponseCode.WINDOW_CLOSED, null));
         }
     }
 
