@@ -15,14 +15,20 @@ import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
+/**
+ * Allows the user to select a calendar from a given list.
+ *
+ * @see CalendarList
+ * @see CalendarListEntry
+ */
 public class CalendarSelector implements ResponsiveGUI {
     private JLabel selectCalendarLabel;
-    public JPanel mainPanel;
+    private JPanel mainPanel;
     private JButton confirmButton;
     private JPanel entryPanel;
     private CalendarSelectorButton[] entries;
     private final ButtonGroup entryButtonGroup = new ButtonGroup();
-    private CompletableFuture<GuiResponse<String>> pendingResponse;
+    private CompletableFuture<GuiResponse<CalendarListEntry>> pendingResponse;
 
     public CalendarSelector() {
         confirmButton.addActionListener(event -> completeResponse());
@@ -33,6 +39,12 @@ public class CalendarSelector implements ResponsiveGUI {
         entryButtonGroup.add(newEntry);
     }
 
+    /**
+     * Fill the window with CalendarSelectorButtons for each entry in the CalendarList.
+     *
+     * @param calList The list of calendars to display.
+     * @see CalendarSelectorButton
+     */
     public void feedCalendarList(CalendarList calList) {
         entryPanel.removeAll();
         for (CalendarListEntry entry : calList.getItems()) addButton(entry);
@@ -43,7 +55,7 @@ public class CalendarSelector implements ResponsiveGUI {
         if (pendingResponse == null) return; // No response to complete
         CalendarSelectorButton selected = (CalendarSelectorButton) entryButtonGroup.getSelection();
         if (selected == null) return; // Can't complete response if nothing selected
-        pendingResponse.complete(new GuiResponse<String>(GuiResponse.ResponseCode.OK, selected.calendar.getId()));
+        pendingResponse.complete(new GuiResponse<CalendarListEntry>(GuiResponse.ResponseCode.OK, selected.calendar));
     }
 
 
@@ -52,14 +64,20 @@ public class CalendarSelector implements ResponsiveGUI {
         return mainPanel;
     }
 
+    /**
+     * Request a calendar be selected from the window, blocking the thread until a response is received.
+     *
+     * @return If the response was successful, returns a GuiResponse with code OK and a dataPacket field of the selected calendar.
+     * Otherwise, returns a GuiResponse with a different code and a null dataPacket.
+     */
     @Override
-    public GuiResponse<String> getResponse() {
+    public GuiResponse<CalendarListEntry> getResponse() {
         this.pendingResponse = new CompletableFuture<>();
-        GuiResponse<String> result;
+        GuiResponse<CalendarListEntry> result;
         try {
             result = this.pendingResponse.get();
         } catch (CancellationException | InterruptedException | ExecutionException e) {
-            return new GuiResponse<String>(GuiResponse.ResponseCode.CANCELLED, null);
+            return new GuiResponse<CalendarListEntry>(GuiResponse.ResponseCode.CANCELLED, null);
         }
         return result;
     }
@@ -67,7 +85,7 @@ public class CalendarSelector implements ResponsiveGUI {
     @Override
     public void onWindowClose() {
         if (this.pendingResponse != null) {
-            pendingResponse.complete(new GuiResponse<String>(GuiResponse.ResponseCode.WINDOW_CLOSED, null));
+            pendingResponse.complete(new GuiResponse<CalendarListEntry>(GuiResponse.ResponseCode.WINDOW_CLOSED, null));
         }
     }
 
