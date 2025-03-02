@@ -13,6 +13,9 @@ import java.io.IOException;
 
 public class GoogleCalToDiscord {
 
+    public static GoogleOAuthManager googleOAuthManager;
+    public static ConfigManager config;
+
     public static void main(String[] args) throws IOException {
         config = new ConfigManager();
         String googleClientID = config.get(ConfigValues.GOOGLE_CLIENT_ID);
