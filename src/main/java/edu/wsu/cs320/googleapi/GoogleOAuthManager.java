@@ -6,6 +6,7 @@ import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.gson.GsonFactory;
 import com.google.auth.oauth2.UserCredentials;
 import edu.wsu.cs320.config.ConfigManager;
+import edu.wsu.cs320.config.ConfigValues;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -62,9 +63,9 @@ public class GoogleOAuthManager {
 
     private void storeCredentials() throws IOException {
         ConfigManager manager = new ConfigManager();
-        manager.put("google_client_id", this.clientID);
-        manager.put("google_client_secret", this.clientSecret);
-        manager.put("google_refresh_token", this.refreshToken);
+        manager.put(ConfigValues.GOOGLE_CLIENT_ID, this.clientID);
+        manager.put(ConfigValues.GOOGLE_CLIENT_SECRET, this.clientSecret);
+        manager.put(ConfigValues.GOOGLE_REFRESH_TOKEN, this.refreshToken);
     }
 
     public void invokeFlow() throws Exception {
