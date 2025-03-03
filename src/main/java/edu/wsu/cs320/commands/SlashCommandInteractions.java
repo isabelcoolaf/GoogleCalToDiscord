@@ -1,12 +1,16 @@
 package edu.wsu.cs320.commands;
 
 import com.google.api.services.calendar.model.Calendar;
+import com.google.api.services.calendar.model.CalendarListEntry;
 import com.google.api.services.calendar.model.Event;
 import de.jcm.discordgamesdk.activity.Activity;
 import de.jcm.discordgamesdk.activity.ActivityType;
 import edu.wsu.cs320.RP.Presence;
+import edu.wsu.cs320.config.ConfigManager;
 import edu.wsu.cs320.googleapi.GoogleCalendarServiceHandler;
+import net.dv8tion.jda.api.entities.emoji.Emoji;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
+import net.dv8tion.jda.api.events.interaction.component.StringSelectInteractionEvent;
 import net.dv8tion.jda.api.events.session.ReadyEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.IntegrationType;
@@ -16,19 +20,20 @@ import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
+import net.dv8tion.jda.api.interactions.components.selections.SelectOption;
+import net.dv8tion.jda.api.interactions.components.selections.StringSelectMenu;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class SlashCommandInteractions extends ListenerAdapter {
     private final Presence richPresence;
     private Calendar curCalendar;
     private GoogleCalendarServiceHandler calHandler;
     private static int eventCount;
+    private int pageNumber;
 
     // Presence required so that commands can alter the data of the activity
     public SlashCommandInteractions(Presence RP) {
@@ -40,7 +45,56 @@ public class SlashCommandInteractions extends ListenerAdapter {
     public void setCurrentCalendar(Calendar googleCal){
         curCalendar = googleCal;
     }
-    public Calendar getCurCalendar() { return curCalendar; }
+    private void setPage(int number) {pageNumber = number;}
+    private int getPage() {return pageNumber;}
+
+    private List<String> getCalendarNames(List<CalendarListEntry> calendarList){
+                        return calendarList.stream()
+                        .map(CalendarListEntry::getSummary)
+                        .collect(Collectors.toList());
+    }
+
+    private StringSelectMenu getCalendarMenu(List<String> calendarNames){
+        List<List<String>> calendarNamesList = new ArrayList<>();
+
+        StringSelectMenu.Builder menuBuilder = StringSelectMenu.create("choose-calendar");
+
+        if (calendarNames.size() > 25){
+            int listLength = calendarNames.size();
+
+            for (int i = 0; i < listLength; i += 23) {
+                int endIndex = Math.min(i + 23, listLength);
+                List<String> chunk = new ArrayList<>();
+                chunk.addAll(0,calendarNames.subList(i, endIndex));
+                if (i > 0){
+                    chunk.add(0, "Previous Page");
+                }
+                if (i + 23 < listLength){
+                    chunk.add(chunk.size(), "Next Page");
+                }
+                calendarNamesList.add(chunk);
+            }
+        } else {
+            calendarNamesList.add(calendarNames);
+        }
+
+        List<String> calendarListTemp = calendarNamesList.get(getPage());
+
+        for (String name : calendarListTemp) {
+            if (name.equals("Next Page")) {
+                menuBuilder.addOptions(SelectOption.of(name, name)
+                        .withEmoji(Emoji.fromUnicode("⏩")));
+            } else if (name.equals("Previous Page")) {
+                menuBuilder.addOptions(SelectOption.of(name, name)
+                        .withEmoji(Emoji.fromUnicode("⏪")));
+            } else {
+                menuBuilder.addOptions(SelectOption.of(name, name));
+            }
+
+        }
+
+        return menuBuilder.build();
+    }
 
     @Override
     public void onSlashCommandInteraction(@NotNull SlashCommandInteractionEvent event) {
@@ -112,9 +166,62 @@ public class SlashCommandInteractions extends ListenerAdapter {
                     richPresence.setActivityState(activityState);
                 }
                 break;
+            case "select_calendar":
+                List<CalendarListEntry> calList;
+                if (calHandler == null) {
+                    event.reply("Google Calendar not authenticated! Please sign in first.").setEphemeral(true).queue();
+                } else {
+                    try {
+                        calList = calHandler.getCalendarList();
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+
+                    List<String> calendarNames = getCalendarNames(calList);
+                    event.reply("Please select a calendar.").addActionRow(getCalendarMenu(calendarNames)).setEphemeral(true).queue();
+                }
+                break;
         }
     }
 
+    @Override
+    public void onStringSelectInteraction(StringSelectInteractionEvent event) {
+        if (event.getComponentId().equals("choose-calendar")) {
+            String selection = event.getValues().get(0);
+            if (selection.equals("Next Page")){
+                setPage(getPage() + 1);
+                List<CalendarListEntry> calList;
+                try {
+                    calList = calHandler.getCalendarList();
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+                List<String> calendarNames = getCalendarNames(calList);
+                event.editMessage("Showing **" + selection + "**. Please select a calendar").setActionRow(getCalendarMenu(calendarNames)).queue();
+
+            } else if (selection.equals("Previous Page")){
+                setPage(getPage() - 1);
+                List<CalendarListEntry> calList;
+                try {
+                    calList = calHandler.getCalendarList();
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+                List<String> calendarNames = getCalendarNames(calList);
+                event.editMessage("Showing **" + selection + "**. Please select a calendar").setActionRow(getCalendarMenu(calendarNames)).queue();
+            } else {
+                ConfigManager config = new ConfigManager();
+                try {
+                    config.put("SelectedCalendar", selection);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+                event.reply("**" + selection + "** is your selected calendar.").setEphemeral(true).queue();
+                event.getMessage().delete().queue();
+
+            }
+        }
+    }
 
     @Override
     public void onReady(@NotNull ReadyEvent event) {
@@ -132,9 +239,9 @@ public class SlashCommandInteractions extends ListenerAdapter {
         }
 
 
-        String[] commandList = {"command_example", "presence_type", "show_next_event"};
-        String[] commandDescriptions = {"command_example", "Changes Presence Type", "Shows next calendar event"};
-        OptionData[] options = {option_example, PresenceType, null};
+        String[] commandList = {"command_example", "presence_type", "show_next_event", "select_calendar"};
+        String[] commandDescriptions = {"command_example", "Changes Presence Type", "Shows next calendar event", "Select a calendar to display"};
+        OptionData[] options = {option_example, PresenceType, null, null};
         for (int i = 0; i < commandList.length; i++) {
             if (options[i] != null){
                 commands.add(Commands.slash(commandList[i], commandDescriptions[i])
