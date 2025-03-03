@@ -33,7 +33,6 @@ public class DiscordInterface extends Thread{
         }
     }
 
-
     @Override
     public void run(){
         if (Token == null || ID == null) {

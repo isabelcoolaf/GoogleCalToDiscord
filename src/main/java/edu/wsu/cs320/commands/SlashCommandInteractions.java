@@ -7,6 +7,7 @@ import de.jcm.discordgamesdk.activity.Activity;
 import de.jcm.discordgamesdk.activity.ActivityType;
 import edu.wsu.cs320.RP.Presence;
 import edu.wsu.cs320.config.ConfigManager;
+import edu.wsu.cs320.config.ConfigValues;
 import edu.wsu.cs320.googleapi.GoogleCalendarServiceHandler;
 import net.dv8tion.jda.api.entities.emoji.Emoji;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
@@ -48,6 +49,14 @@ public class SlashCommandInteractions extends ListenerAdapter {
     private void setPage(int number) {pageNumber = number;}
     private int getPage() {return pageNumber;}
 
+    private List<CalendarListEntry> getCalList(GoogleCalendarServiceHandler handler){
+        try {
+            return handler.getCalendarList();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     private List<String> getCalendarNames(List<CalendarListEntry> calendarList){
                         return calendarList.stream()
                         .map(CalendarListEntry::getSummary)
@@ -80,6 +89,7 @@ public class SlashCommandInteractions extends ListenerAdapter {
 
         List<String> calendarListTemp = calendarNamesList.get(getPage());
 
+        // This will break if someone names their calendar "Next/Previous Page"
         for (String name : calendarListTemp) {
             if (name.equals("Next Page")) {
                 menuBuilder.addOptions(SelectOption.of(name, name)
@@ -119,7 +129,6 @@ public class SlashCommandInteractions extends ListenerAdapter {
                 activityTypes.put("Playing", ActivityType.PLAYING);
                 activityTypes.put("Watching", ActivityType.WATCHING);
                 activityTypes.put("Listening", ActivityType.LISTENING);
-//                activityTypes.put("Streaming", ActivityType.STREAMING); May be reserved / not usable
                 activityTypes.put("Competing", ActivityType.COMPETING);
 
                 ActivityType type = activityTypes.get(presenceResponse);
@@ -167,17 +176,10 @@ public class SlashCommandInteractions extends ListenerAdapter {
                 }
                 break;
             case "select_calendar":
-                List<CalendarListEntry> calList;
                 if (calHandler == null) {
                     event.reply("Google Calendar not authenticated! Please sign in first.").setEphemeral(true).queue();
                 } else {
-                    try {
-                        calList = calHandler.getCalendarList();
-                    } catch (IOException e) {
-                        throw new RuntimeException(e);
-                    }
-
-                    List<String> calendarNames = getCalendarNames(calList);
+                    List<String> calendarNames = getCalendarNames(getCalList(calHandler));
                     event.reply("Please select a calendar.").addActionRow(getCalendarMenu(calendarNames)).setEphemeral(true).queue();
                 }
                 break;
@@ -190,29 +192,29 @@ public class SlashCommandInteractions extends ListenerAdapter {
             String selection = event.getValues().get(0);
             if (selection.equals("Next Page")){
                 setPage(getPage() + 1);
-                List<CalendarListEntry> calList;
-                try {
-                    calList = calHandler.getCalendarList();
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
-                List<String> calendarNames = getCalendarNames(calList);
-                event.editMessage("Showing **" + selection + "**. Please select a calendar").setActionRow(getCalendarMenu(calendarNames)).queue();
+                List<String> calendarNames = getCalendarNames(getCalList(calHandler));
+                event.editMessage("Showing **" + selection + "**. Please select a calendar")
+                        .setActionRow(getCalendarMenu(calendarNames)).queue();
 
             } else if (selection.equals("Previous Page")){
                 setPage(getPage() - 1);
-                List<CalendarListEntry> calList;
-                try {
-                    calList = calHandler.getCalendarList();
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
-                List<String> calendarNames = getCalendarNames(calList);
-                event.editMessage("Showing **" + selection + "**. Please select a calendar").setActionRow(getCalendarMenu(calendarNames)).queue();
+                List<String> calendarNames = getCalendarNames(getCalList(calHandler));
+                event.editMessage("Showing **" + selection + "**. Please select a calendar")
+                        .setActionRow(getCalendarMenu(calendarNames)).queue();
             } else {
                 ConfigManager config = new ConfigManager();
+                List<CalendarListEntry> calList = getCalList(calHandler);
+                String calID = null;
+
+                for (CalendarListEntry entry : calList) {
+                    if (entry.getSummary() != null && entry.getSummary().equals(selection)) {
+                        calID = entry.getId();
+                        break;
+                    }
+                }
+
                 try {
-                    config.put("SelectedCalendar", selection);
+                    config.put(ConfigValues.GOOGLE_CALENDAR_ID, calID);
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
