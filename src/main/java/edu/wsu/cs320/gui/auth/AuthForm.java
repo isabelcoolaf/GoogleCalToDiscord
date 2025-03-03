@@ -1,4 +1,4 @@
-package edu.wsu.cs320.gui.GoogleAuthWindow;
+package edu.wsu.cs320.gui.auth;
 
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
@@ -12,7 +12,10 @@ import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
-public class GoogleAuthWindow implements ResponsiveGUI {
+/**
+ * The AuthWindow is a window that allows the user to type in authentication data necessary for running the program.
+ */
+public class AuthForm implements ResponsiveGUI {
     public JPanel mainPanel;
     private JButton saveButton;
     private JPanel centerPanel;
@@ -26,8 +29,27 @@ public class GoogleAuthWindow implements ResponsiveGUI {
     private JLabel discordTokenLabel;
     private CompletableFuture<GuiResponse<String[]>> pendingResponse;
 
-    public GoogleAuthWindow() {
+
+    public AuthForm() {
         saveButton.addActionListener(event -> completeResponse());
+    }
+
+
+    private void completeResponse() {
+        if (pendingResponse == null) return; // No response to complete
+        String[] dataPacket = new String[4];
+        String googleClientID = googleIdField.getText();
+        String googleClientSecret = googleSecretField.getText();
+        String discordClientID = discordIdField.getText();
+        String discordBotToken = discordTokenField.getText();
+        if (googleClientID.isEmpty() || googleClientSecret.isEmpty() || discordClientID.isEmpty() || discordBotToken.isEmpty()) {
+            pendingResponse.complete(new GuiResponse<String[]>(GuiResponse.ResponseCode.INCOMPLETE_DATA, null));
+        }
+        dataPacket[0] = googleIdField.getText();
+        dataPacket[1] = googleSecretField.getText();
+        dataPacket[2] = discordIdField.getText();
+        dataPacket[3] = discordTokenField.getText();
+        pendingResponse.complete(new GuiResponse<String[]>(GuiResponse.ResponseCode.OK, dataPacket));
     }
 
     @Override
@@ -35,30 +57,12 @@ public class GoogleAuthWindow implements ResponsiveGUI {
         return mainPanel;
     }
 
-
-    public void completeResponse() {
-        System.out.println("Checking if response exists...");
-        if (pendingResponse == null) return; // No response to complete
-        System.out.println("Completing Response...");
-        String[] dataPacket = new String[4];
-        String googleClientID = googleIdField.getText();
-        String googleClientSecret = googleSecretField.getText();
-        String discordClientID = discordIdField.getText();
-        String discordBotToken = discordTokenField.getText();
-        if (googleClientID.isEmpty() || googleClientSecret.isEmpty() || discordClientID.isEmpty() || discordBotToken.isEmpty()) {
-            pendingResponse.complete(
-                    new GuiResponse<String[]>(GuiResponse.ResponseCode.INCOMPLETE_DATA, null)
-            );
-        }
-        dataPacket[0] = googleIdField.getText();
-        dataPacket[1] = googleSecretField.getText();
-        dataPacket[2] = discordIdField.getText();
-        dataPacket[3] = discordTokenField.getText();
-        pendingResponse.complete(
-                new GuiResponse<String[]>(GuiResponse.ResponseCode.OK, dataPacket)
-        );
-    }
-
+    /**
+     * Request auth data from the window, blocking the thread until a response is received.
+     *
+     * @return If the response was successful, returns with code OK with dataPacket of structure [Google ID, Google Secret, Discord ID, Discord Token].
+     * Otherwise, returns with a different code and a null dataPacket.
+     */
     @Override
     public GuiResponse<String[]> getResponse() {
         this.pendingResponse = new CompletableFuture<GuiResponse<String[]>>();

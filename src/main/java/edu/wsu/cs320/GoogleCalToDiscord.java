@@ -1,6 +1,7 @@
 package edu.wsu.cs320;
 
 import edu.wsu.cs320.config.ConfigManager;
+import edu.wsu.cs320.config.ConfigValues;
 import edu.wsu.cs320.googleapi.GoogleOAuthManager;
 import edu.wsu.cs320.gui.control.GuiController;
 import edu.wsu.cs320.gui.control.GuiResponse;
@@ -12,15 +13,18 @@ import java.io.IOException;
 
 public class GoogleCalToDiscord {
 
-    public static void main(String[] args) throws IOException {
-        ConfigManager config = new ConfigManager();
-        String googleClientID = config.get("google_client_id");
-        String googleClientSecret = config.get("google_client_secret");
-        String googleRefreshToken = config.get("google_refresh_token");
-        String discordClientID = config.get("discord_client_id");
-        String discordBotToken = config.get("discord_bot_token");
+    public static GoogleOAuthManager googleOAuthManager;
+    public static ConfigManager config;
 
-        GoogleOAuthManager googleOAuthManager = new GoogleOAuthManager(googleClientID, googleClientSecret, googleRefreshToken);
+    public static void main(String[] args) throws IOException {
+        config = new ConfigManager();
+        String googleClientID = config.get(ConfigValues.GOOGLE_CLIENT_ID);
+        String googleClientSecret = config.get(ConfigValues.GOOGLE_CLIENT_SECRET);
+        String googleRefreshToken = config.get(ConfigValues.GOOGLE_REFRESH_TOKEN);
+        String discordClientID = config.get(ConfigValues.DISCORD_CLIENT_ID);
+        String discordBotToken = config.get(ConfigValues.DISCORD_BOT_TOKEN);
+
+        googleOAuthManager = new GoogleOAuthManager(googleClientID, googleClientSecret, googleRefreshToken);
 
         if (discordClientID != null && discordBotToken != null) {
             DiscordInterface discordInterface = new DiscordInterface(discordClientID, discordBotToken);
@@ -50,15 +54,15 @@ public class GoogleCalToDiscord {
                     break;
                 }
             }
-            config.put("google_client_id", resp.data[0]);
-            config.put("google_client_secret", resp.data[1]);
-            config.put("discord_client_id", resp.data[2]);
-            config.put("discord_bot_token", resp.data[3]);
+            config.put(ConfigValues.GOOGLE_CLIENT_ID, resp.data[0]);
+            config.put(ConfigValues.GOOGLE_CLIENT_SECRET, resp.data[1]);
+            config.put(ConfigValues.DISCORD_CLIENT_ID, resp.data[2]);
+            config.put(ConfigValues.DISCORD_BOT_TOKEN, resp.data[3]);
             try {
                 googleOAuthManager = new GoogleOAuthManager(resp.data[0], resp.data[1], "");
                 googleOAuthManager.invokeFlow();
                 if (googleOAuthManager.isAuthenticated()) {
-                    config.put("google_refresh_token", googleOAuthManager.getCredentials().getRefreshToken());
+                    config.put(ConfigValues.GOOGLE_REFRESH_TOKEN, googleOAuthManager.getCredentials().getRefreshToken());
                 }
             } catch (Exception e) {
                 // TODO: Handle errors with auth flow

@@ -122,5 +122,8 @@ public class CalendarPollingService {
                 }
             }
         }
+        if (!setCurrent) {
+            currentEvent = null;
+        }
     }
 }
