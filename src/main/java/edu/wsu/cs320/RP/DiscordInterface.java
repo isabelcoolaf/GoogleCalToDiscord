@@ -33,13 +33,6 @@ public class DiscordInterface extends Thread{
         }
     }
 
-    public Calendar getCurCalendar(){
-        if (commands != null){
-            return commands.getCurCalendar();
-        }
-        return null;
-    }
-
 
     @Override
     public void run(){

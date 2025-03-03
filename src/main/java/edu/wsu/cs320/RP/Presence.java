@@ -48,16 +48,6 @@ public class Presence {
                 updater = core;
                 try(Activity activity = new Activity()){
                     RP = activity;
-
-                    activity.setType(ActivityType.WATCHING);
-                    activity.setDetails("Title Text Here");
-                    activity.setState("Description Here");
-
-                    activity.timestamps().setStart(Instant.now());
-
-                    activity.party().size().setMaxSize(1);
-                    activity.party().size().setCurrentSize(1);
-
                     core.activityManager().updateActivity(RP);
                 }
 
