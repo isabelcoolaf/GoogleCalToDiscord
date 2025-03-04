@@ -218,8 +218,9 @@ public class SlashCommandInteractions extends ListenerAdapter {
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
-                event.reply("**" + selection + "** is your selected calendar.").setEphemeral(true).queue();
-                event.getMessage().delete().queue();
+
+                event.editMessage("**" + selection + "** is your selected calendar.").queue();
+                event.editSelectMenu(null).queue();
 
             }
         }
