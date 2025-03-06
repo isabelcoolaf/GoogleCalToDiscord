@@ -47,7 +47,7 @@ public class SlashCommandInteractions extends ListenerAdapter {
         curCalendar = googleCal;
     }
     private void setPage(int number) {pageNumber = number;}
-    private int getPage() {return pageNumber;}
+    public int getPage() {return pageNumber;}
 
     private List<CalendarListEntry> getCalList(GoogleCalendarServiceHandler handler){
         try {
@@ -63,7 +63,7 @@ public class SlashCommandInteractions extends ListenerAdapter {
                         .collect(Collectors.toList());
     }
 
-    private StringSelectMenu getCalendarMenu(List<String> calendarNames){
+    public StringSelectMenu getCalendarMenu(List<String> calendarNames){
         List<List<String>> calendarNamesList = new ArrayList<>();
 
         StringSelectMenu.Builder menuBuilder = StringSelectMenu.create("choose-calendar");
@@ -188,6 +188,7 @@ public class SlashCommandInteractions extends ListenerAdapter {
 
     @Override
     public void onStringSelectInteraction(StringSelectInteractionEvent event) {
+        System.out.println(event);
         if (event.getComponentId().equals("choose-calendar")) {
             String selection = event.getValues().get(0);
             if (selection.equals("Next Page")){
