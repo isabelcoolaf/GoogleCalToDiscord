@@ -46,7 +46,7 @@ public class SlashCommandInteractions extends ListenerAdapter {
     public void setCurrentCalendar(Calendar googleCal){
         curCalendar = googleCal;
     }
-    private void setPage(int number) {pageNumber = number;}
+    public void setPage(int number) {pageNumber = number;}
     private int getPage() {return pageNumber;}
 
     private List<CalendarListEntry> getCalList(GoogleCalendarServiceHandler handler){
@@ -57,13 +57,13 @@ public class SlashCommandInteractions extends ListenerAdapter {
         }
     }
 
-    private List<String> getCalendarNames(List<CalendarListEntry> calendarList){
-                        return calendarList.stream()
-                        .map(CalendarListEntry::getSummary)
-                        .collect(Collectors.toList());
+    public List<String> getCalendarNames(List<CalendarListEntry> calendarList){
+        return calendarList.stream()
+        .map(CalendarListEntry::getSummary)
+        .collect(Collectors.toList());
     }
 
-    private StringSelectMenu getCalendarMenu(List<String> calendarNames){
+    public StringSelectMenu getCalendarMenu(List<String> calendarNames){
         List<List<String>> calendarNamesList = new ArrayList<>();
 
         StringSelectMenu.Builder menuBuilder = StringSelectMenu.create("choose-calendar");
@@ -187,7 +187,7 @@ public class SlashCommandInteractions extends ListenerAdapter {
     }
 
     @Override
-    public void onStringSelectInteraction(StringSelectInteractionEvent event) {
+    public void onStringSelectInteraction(@NotNull StringSelectInteractionEvent event) {
         if (event.getComponentId().equals("choose-calendar")) {
             String selection = event.getValues().get(0);
             if (selection.equals("Next Page")){
@@ -218,8 +218,9 @@ public class SlashCommandInteractions extends ListenerAdapter {
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
-                event.reply("**" + selection + "** is your selected calendar.").setEphemeral(true).queue();
-                event.getMessage().delete().queue();
+
+                event.editMessage("**" + selection + "** is your selected calendar.").queue();
+                event.editSelectMenu(null).queue();
 
             }
         }
