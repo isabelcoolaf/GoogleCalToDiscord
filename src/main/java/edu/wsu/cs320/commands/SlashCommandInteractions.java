@@ -47,7 +47,7 @@ public class SlashCommandInteractions extends ListenerAdapter {
         curCalendar = googleCal;
     }
     private void setPage(int number) {pageNumber = number;}
-    public int getPage() {return pageNumber;}
+    private int getPage() {return pageNumber;}
 
     private List<CalendarListEntry> getCalList(GoogleCalendarServiceHandler handler){
         try {
@@ -187,8 +187,7 @@ public class SlashCommandInteractions extends ListenerAdapter {
     }
 
     @Override
-    public void onStringSelectInteraction(StringSelectInteractionEvent event) {
-        System.out.println(event);
+    public void onStringSelectInteraction(@NotNull StringSelectInteractionEvent event) {
         if (event.getComponentId().equals("choose-calendar")) {
             String selection = event.getValues().get(0);
             if (selection.equals("Next Page")){
