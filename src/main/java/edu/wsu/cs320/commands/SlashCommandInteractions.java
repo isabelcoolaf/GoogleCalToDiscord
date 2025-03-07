@@ -46,7 +46,7 @@ public class SlashCommandInteractions extends ListenerAdapter {
     public void setCurrentCalendar(Calendar googleCal){
         curCalendar = googleCal;
     }
-    private void setPage(int number) {pageNumber = number;}
+    public void setPage(int number) {pageNumber = number;}
     private int getPage() {return pageNumber;}
 
     private List<CalendarListEntry> getCalList(GoogleCalendarServiceHandler handler){
@@ -57,10 +57,10 @@ public class SlashCommandInteractions extends ListenerAdapter {
         }
     }
 
-    private List<String> getCalendarNames(List<CalendarListEntry> calendarList){
-                        return calendarList.stream()
-                        .map(CalendarListEntry::getSummary)
-                        .collect(Collectors.toList());
+    public List<String> getCalendarNames(List<CalendarListEntry> calendarList){
+        return calendarList.stream()
+        .map(CalendarListEntry::getSummary)
+        .collect(Collectors.toList());
     }
 
     public StringSelectMenu getCalendarMenu(List<String> calendarNames){
