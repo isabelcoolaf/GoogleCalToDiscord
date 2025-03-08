@@ -1,5 +1,4 @@
-package edu.wsu.cs320.unittest;
-
+package edu.wsu.cs320;
 
 import com.google.api.services.calendar.model.CalendarListEntry;
 import edu.wsu.cs320.RP.Presence;
@@ -10,14 +9,15 @@ import edu.wsu.cs320.config.ConfigValues;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.interactions.components.selections.StringSelectMenu;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-import static org.junit.Assert.*;
-public class discordTests {
+import static org.junit.jupiter.api.Assertions.*;
+
+public class DiscordTests {
 
     private List<String> makeNameList(){
         List<String> names = new ArrayList<>();
@@ -110,7 +110,7 @@ public class discordTests {
     }
 
     private JDA makeTestBot(){
-        ConfigManager config = new ConfigManager();
+        ConfigManager config = new ConfigManager(ConfigValues.CONFIG_FILENAME);
         Presence presence = new Presence(config.get(ConfigValues.DISCORD_CLIENT_ID));
         SlashCommandInteractions commands = new SlashCommandInteractions(presence);
         return JDABuilder.createDefault(config.get(ConfigValues.DISCORD_BOT_TOKEN))
