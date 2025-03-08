@@ -42,7 +42,7 @@ public class DiscordTests {
         entry.setSummary("test");
         calendarList.add(entry);
         String[] dummyList = {"test"};
-        assertEquals(dummyList, new SlashCommandInteractions(null).getCalendarNames(calendarList).toArray());
+        assertArrayEquals(dummyList, new SlashCommandInteractions(null).getCalendarNames(calendarList).toArray());
     }
 
     @Test
