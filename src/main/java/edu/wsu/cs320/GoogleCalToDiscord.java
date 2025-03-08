@@ -17,14 +17,14 @@ public class GoogleCalToDiscord {
     public static ConfigManager config;
 
     public static void main(String[] args) throws IOException {
-        config = new ConfigManager();
+        config = new ConfigManager(ConfigValues.CONFIG_FILENAME);
         String googleClientID = config.get(ConfigValues.GOOGLE_CLIENT_ID);
         String googleClientSecret = config.get(ConfigValues.GOOGLE_CLIENT_SECRET);
         String googleRefreshToken = config.get(ConfigValues.GOOGLE_REFRESH_TOKEN);
         String discordClientID = config.get(ConfigValues.DISCORD_CLIENT_ID);
         String discordBotToken = config.get(ConfigValues.DISCORD_BOT_TOKEN);
 
-        googleOAuthManager = new GoogleOAuthManager(googleClientID, googleClientSecret, googleRefreshToken);
+        googleOAuthManager = new GoogleOAuthManager(googleClientID, googleClientSecret, googleRefreshToken, ConfigValues.CONFIG_FILENAME);
 
         if (discordClientID != null && discordBotToken != null) {
             DiscordInterface discordInterface = new DiscordInterface(discordClientID, discordBotToken);
@@ -59,7 +59,7 @@ public class GoogleCalToDiscord {
             config.put(ConfigValues.DISCORD_CLIENT_ID, resp.data[2]);
             config.put(ConfigValues.DISCORD_BOT_TOKEN, resp.data[3]);
             try {
-                googleOAuthManager = new GoogleOAuthManager(resp.data[0], resp.data[1], "");
+                googleOAuthManager = new GoogleOAuthManager(resp.data[0], resp.data[1], "", ConfigValues.CONFIG_FILENAME);
                 googleOAuthManager.invokeFlow();
                 if (googleOAuthManager.isAuthenticated()) {
                     config.put(ConfigValues.GOOGLE_REFRESH_TOKEN, googleOAuthManager.getCredentials().getRefreshToken());

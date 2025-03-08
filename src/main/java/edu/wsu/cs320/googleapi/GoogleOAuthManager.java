@@ -24,14 +24,19 @@ public class GoogleOAuthManager {
     private final String clientID;
     private final String clientSecret;
     private String refreshToken;
+    private final String configPath;
+
     private String accessToken;
 
     private static volatile String callbackResponse = "";
+    private static volatile Error callbackException = null;
 
-    public GoogleOAuthManager(String clientID, String clientSecret, String refreshToken) {
+    public GoogleOAuthManager(String clientID, String clientSecret, String refreshToken, String configPath) {
         this.clientID = clientID;
         this.clientSecret = clientSecret;
         this.refreshToken = refreshToken;
+        this.configPath = configPath;
+
         this.accessToken = "";
 
         // This will validate the refresh token and try to fetch a new access token.
@@ -61,8 +66,8 @@ public class GoogleOAuthManager {
         }
     }
 
-    private void storeCredentials() throws IOException {
-        ConfigManager manager = new ConfigManager();
+    public void storeCredentials() throws IOException {
+        ConfigManager manager = new ConfigManager(this.configPath);
         manager.put(ConfigValues.GOOGLE_CLIENT_ID, this.clientID);
         manager.put(ConfigValues.GOOGLE_CLIENT_SECRET, this.clientSecret);
         manager.put(ConfigValues.GOOGLE_REFRESH_TOKEN, this.refreshToken);
@@ -73,7 +78,10 @@ public class GoogleOAuthManager {
         try (ServerSocket sock = new ServerSocket(0)) {
             port = sock.getLocalPort();
         }
+        invokeFlow(port);
+    }
 
+    public void invokeFlow(int port) throws Exception {
         String oauthURL = "https://accounts.google.com/o/oauth2/v2/auth?client_id=" + this.clientID + "&redirect_uri=http://localhost:" + port + "&response_type=code&scope=https://www.googleapis.com/auth/calendar&access_type=offline&prompt=select_account";
 
         Server server = new Server(port);
@@ -87,19 +95,22 @@ public class GoogleOAuthManager {
                 String err = req.getParameter("error");
                 if (err != null && !err.isEmpty()) {
                     resp.getWriter().write(err);
-                    throw new Error(err);
+                    callbackException = new Error(err);
+                    return;
                 }
                 String scope = req.getParameter("scope");
                 if (scope == null || !scope.contains("calendar")) {
                     err = "Missing scope. Re-authorize with all scopes checked.";
                     resp.getWriter().write(err);
-                    throw new Error(err);
+                    callbackException = new Error(err);
+                    return;
                 }
                 callbackResponse = req.getParameter("code");
                 if (callbackResponse == null || callbackResponse.isEmpty()) {
                     err = "Didn't receive code from Google. Try again?";
                     resp.getWriter().write(err);
-                    throw new Error(err);
+                    callbackException = new Error(err);
+                    return;
                 }
                 resp.getWriter().write("Authentication successful! You may close this window.");
             }
@@ -108,10 +119,15 @@ public class GoogleOAuthManager {
         server.start();
 
         Desktop.getDesktop().browse(new URI(oauthURL));
-        while (callbackResponse.isEmpty()) {
+        while ((callbackResponse == null || callbackResponse.isEmpty()) && callbackException == null) {
             Thread.sleep(100);
         }
         server.stop();
+        if (callbackException != null) {
+            Error error = callbackException;
+            callbackException = null;
+            throw error;
+        }
         GoogleTokenResponse response = new GoogleAuthorizationCodeTokenRequest(
                 new NetHttpTransport(),
                 GsonFactory.getDefaultInstance(),
