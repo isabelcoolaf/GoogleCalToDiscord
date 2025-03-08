@@ -202,7 +202,7 @@ public class SlashCommandInteractions extends ListenerAdapter {
                 event.editMessage("Showing **" + selection + "**. Please select a calendar")
                         .setActionRow(getCalendarMenu(calendarNames)).queue();
             } else {
-                ConfigManager config = new ConfigManager();
+                ConfigManager config = new ConfigManager(ConfigValues.CONFIG_FILENAME);
                 List<CalendarListEntry> calList = getCalList(calHandler);
                 String calID = null;
 

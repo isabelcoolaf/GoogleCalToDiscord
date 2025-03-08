@@ -17,7 +17,7 @@ public class GoogleCalToDiscord {
     public static ConfigManager config;
 
     public static void main(String[] args) throws IOException {
-        config = new ConfigManager();
+        config = new ConfigManager(ConfigValues.CONFIG_FILENAME);
         String googleClientID = config.get(ConfigValues.GOOGLE_CLIENT_ID);
         String googleClientSecret = config.get(ConfigValues.GOOGLE_CLIENT_SECRET);
         String googleRefreshToken = config.get(ConfigValues.GOOGLE_REFRESH_TOKEN);

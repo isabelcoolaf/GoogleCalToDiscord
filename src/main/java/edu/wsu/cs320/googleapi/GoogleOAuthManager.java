@@ -62,7 +62,7 @@ public class GoogleOAuthManager {
     }
 
     private void storeCredentials() throws IOException {
-        ConfigManager manager = new ConfigManager();
+        ConfigManager manager = new ConfigManager(ConfigValues.CONFIG_FILENAME);
         manager.put(ConfigValues.GOOGLE_CLIENT_ID, this.clientID);
         manager.put(ConfigValues.GOOGLE_CLIENT_SECRET, this.clientSecret);
         manager.put(ConfigValues.GOOGLE_REFRESH_TOKEN, this.refreshToken);
