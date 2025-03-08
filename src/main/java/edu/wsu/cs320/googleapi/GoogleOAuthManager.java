@@ -66,8 +66,8 @@ public class GoogleOAuthManager {
         }
     }
 
-    private void storeCredentials() throws IOException {
-        ConfigManager manager = new ConfigManager(ConfigValues.CONFIG_FILENAME);
+    public void storeCredentials() throws IOException {
+        ConfigManager manager = new ConfigManager(this.configPath);
         manager.put(ConfigValues.GOOGLE_CLIENT_ID, this.clientID);
         manager.put(ConfigValues.GOOGLE_CLIENT_SECRET, this.clientSecret);
         manager.put(ConfigValues.GOOGLE_REFRESH_TOKEN, this.refreshToken);
@@ -78,7 +78,10 @@ public class GoogleOAuthManager {
         try (ServerSocket sock = new ServerSocket(0)) {
             port = sock.getLocalPort();
         }
+        invokeFlow(port);
+    }
 
+    public void invokeFlow(int port) throws Exception {
         String oauthURL = "https://accounts.google.com/o/oauth2/v2/auth?client_id=" + this.clientID + "&redirect_uri=http://localhost:" + port + "&response_type=code&scope=https://www.googleapis.com/auth/calendar&access_type=offline&prompt=select_account";
 
         Server server = new Server(port);
