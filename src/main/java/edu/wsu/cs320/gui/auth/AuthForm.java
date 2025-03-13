@@ -31,7 +31,12 @@ public class AuthForm implements ResponsiveGUI {
 
 
     public AuthForm() {
+        saveButton.setName("saveButton");
         saveButton.addActionListener(event -> completeResponse());
+        googleIdField.setName("googleIdField");
+        googleSecretField.setName("googleSecretField");
+        discordIdField.setName("discordIdField");
+        discordTokenField.setName("discordTokenField");
     }
 
 
