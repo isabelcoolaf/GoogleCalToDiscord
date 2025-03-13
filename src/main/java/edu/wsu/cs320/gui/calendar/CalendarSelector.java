@@ -11,6 +11,8 @@ import edu.wsu.cs320.gui.control.GuiResponse;
 import edu.wsu.cs320.gui.control.ResponsiveGUI;
 
 import java.awt.*;
+import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -26,16 +28,18 @@ public class CalendarSelector implements ResponsiveGUI {
     private JPanel mainPanel;
     private JButton confirmButton;
     private JPanel entryPanel;
-    private CalendarSelectorButton[] entries;
+    public LinkedList<CalendarSelectorButton> buttons;
     private final ButtonGroup entryButtonGroup = new ButtonGroup();
     private CompletableFuture<GuiResponse<CalendarListEntry>> pendingResponse;
 
     public CalendarSelector() {
         confirmButton.addActionListener(event -> completeResponse());
+        buttons = new LinkedList<>();
     }
 
     private void addButton(CalendarListEntry cal) {
         CalendarSelectorButton newEntry = new CalendarSelectorButton(cal);
+        buttons.add(newEntry);
         entryButtonGroup.add(newEntry);
     }
 
@@ -47,6 +51,7 @@ public class CalendarSelector implements ResponsiveGUI {
      */
     public void feedCalendarList(CalendarList calList) {
         entryPanel.removeAll();
+        buttons.clear();
         for (CalendarListEntry entry : calList.getItems()) addButton(entry);
         entryButtonGroup.clearSelection();
     }

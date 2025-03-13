@@ -5,9 +5,17 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+/**
+ * Blackbox test for the instantiation of CalendarSelectorButtons.
+ * One of the functional requirements of the project is:
+ * <pre>When the user has authenticated with Google, a GUI opens that allows the user to select one calendar out of all calendars on their Google account.</pre>
+ * This requirement is not fulfilled if the calendar selector's buttons are created incorrectly.
+ * Therefore, we stress test the instantiation of the buttons.
+ */
 public class CalendarSelectorButtonTest {
 
-    // Blackbox. Makes sure buttons can't be created using null.
+
+    // Makes sure the button properly handles a null argument.
     @Test
     public void disallowsNullCalendars() {
         CalendarSelectorButton button;
@@ -19,9 +27,9 @@ public class CalendarSelectorButtonTest {
         assertNotNull(button.calendar);
     }
 
-    // Black-Box. Makes sure the button actually stores the calendar it's instantiated with.
+    // Makes sure the button actually stores the calendar it's instantiated with.
     @Test
-    public void properlyStoresCalendar() {
+    public void correctlyStoresCalendarInField() {
         CalendarListEntry entry = new CalendarListEntry();
         entry.setSummary("Test Summary");
         entry.setDescription("Test Description");
@@ -29,26 +37,14 @@ public class CalendarSelectorButtonTest {
         assertEquals(entry, button.calendar);
     }
 
-    // Blackbox. Makes sure that the button's name is set by the CalendarListEntry's name (aka summary).
+    // Makes sure that the button's text and tooltip are properly extracted from a given entry's name (AKA summary).
     @Test
-    public void correctName() {
-        CalendarListEntry entry = new CalendarListEntry();
-        entry.setSummary("Test Summary");
-        entry.setDescription("Test Description");
+    public void correctlySetsButtonLabelAndDescription() {
+        CalendarListEntry entry = new CalendarListEntry()//
+                .setSummary("Test Summary")//
+                .setDescription("Test Description");//
         CalendarSelectorButton button = new CalendarSelectorButton(entry);
         assertEquals(entry.getSummary(), button.getText());
-    }
-
-
-    // Blackbox. Makes sure that the button's tooltip is set by the CalendarListEntry's description.
-    @Test
-    public void correctDescription() {
-        CalendarListEntry entry = new CalendarListEntry();
-        entry.setSummary("Test Summary");
-        entry.setDescription("Test Description");
-        CalendarSelectorButton button = new CalendarSelectorButton(entry);
         assertEquals(entry.getDescription(), button.getToolTipText());
     }
-
-
 }
