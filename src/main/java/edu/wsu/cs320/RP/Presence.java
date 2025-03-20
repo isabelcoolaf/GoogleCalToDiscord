@@ -32,13 +32,26 @@ public class Presence {
         updater.activityManager().updateActivity(RP);
     }
 
-    // Takes a time in milliseconds and displays a time bar
-    public void setTimeBar(Activity activity, long time){
-        long startTime = Instant.now().toEpochMilli();
-        long endTime = startTime + time;
-        activity.timestamps().setStart(Instant.ofEpochSecond(startTime));
-        activity.timestamps().setEnd(Instant.ofEpochSecond(endTime));
-        updater.activityManager().updateActivity(RP);
+    private void calendarEventUpdater(Event event){
+        if (event != null) {
+            try (Activity activity = new Activity()){
+                activity.setType(ActivityType.WATCHING);
+                activity.setDetails(event.getSummary());
+                activity.setState(event.getDescription());
+                activity.timestamps().setStart(Instant.ofEpochMilli(event.getStart().getDateTime().getValue()));
+                activity.timestamps().setEnd(Instant.ofEpochMilli(event.getEnd().getDateTime().getValue()));
+                RP = activity;
+                updater.activityManager().updateActivity(RP);
+            }
+        } else {
+            try (Activity activity = new Activity()){
+                activity.setType(ActivityType.WATCHING);
+                activity.setDetails("No Current Event");
+                activity.setState("Calendar empty at this timeslot");
+                RP = activity;
+                updater.activityManager().updateActivity(RP);
+            }
+        }
     }
 
     public void Activity() throws IOException{
@@ -55,29 +68,23 @@ public class Presence {
                 GoogleCalendarServiceHandler handler = new GoogleCalendarServiceHandler(GoogleCalToDiscord.googleOAuthManager.getCredentials());
                 CalendarPollingService pollingService = new CalendarPollingService(handler, GoogleCalToDiscord.config.get(ConfigValues.GOOGLE_CALENDAR_ID));
                 pollingService.start();
+
+                Event eventStart = pollingService.getCurrentEvent();
+                calendarEventUpdater(eventStart);
+
                 // DO NOT TOUCH THIS LOOP (it will break things)
+                Event lastEvent = eventStart;
                 while(true) {
-                    core.runCallbacks();
+                    // Does not update the activity unless the event has changed
                     Event event = pollingService.getCurrentEvent();
-                    if (event != null) {
-                        try (Activity activity = new Activity()){
-                            activity.setType(ActivityType.WATCHING);
-                            activity.setDetails(event.getSummary());
-                            activity.setState(event.getDescription());
-                            activity.timestamps().setStart(Instant.ofEpochMilli(event.getStart().getDateTime().getValue()));
-                            activity.timestamps().setEnd(Instant.ofEpochMilli(event.getEnd().getDateTime().getValue()));
-                            RP = activity;
-                            core.activityManager().updateActivity(RP);
-                        }
-                    } else {
-                        try (Activity activity = new Activity()){
-                            activity.setType(ActivityType.WATCHING);
-                            activity.setDetails("No Current Event");
-                            activity.setState("Calendar empty at this timeslot");
-                            RP = activity;
-                            core.activityManager().updateActivity(RP);
-                        }
+                    if (event != null && !event.equals(lastEvent)){
+                        lastEvent = event;
+                        calendarEventUpdater(event);
+                    } else if (event == null && lastEvent != null) {
+                        lastEvent = null;
+                        calendarEventUpdater(null);
                     }
+                    core.runCallbacks();
                     try {
                         Thread.sleep(20);
                     }

@@ -17,9 +17,9 @@ public class DiscordInterface extends Thread{
         Token = token;
     }
 
-    public void setCurCalendar(Calendar googleCal){
+    public void setCurCalendar(String googleCalID){
         if (commands != null){
-            commands.setCurrentCalendar(googleCal);
+            commands.setCurrentCalendar(googleCalID);
         }
     }
 
