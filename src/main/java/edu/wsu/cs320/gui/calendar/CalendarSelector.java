@@ -28,6 +28,7 @@ public class CalendarSelector implements ResponsiveGUI {
     private JPanel mainPanel;
     private JButton confirmButton;
     private JPanel entryPanel;
+    private JScrollPane scrollPane;
     public LinkedList<CalendarSelectorButton> buttons;
     private final ButtonGroup entryButtonGroup = new ButtonGroup();
     private CompletableFuture<GuiResponse<CalendarListEntry>> pendingResponse;
@@ -41,6 +42,7 @@ public class CalendarSelector implements ResponsiveGUI {
         CalendarSelectorButton newEntry = new CalendarSelectorButton(cal);
         buttons.add(newEntry);
         entryButtonGroup.add(newEntry);
+        entryPanel.add(newEntry);
     }
 
     /**
@@ -50,8 +52,11 @@ public class CalendarSelector implements ResponsiveGUI {
      * @see CalendarSelectorButton
      */
     public void feedCalendarList(CalendarList calList) {
+        System.out.println("Adding list..");
+        for (CalendarListEntry item : calList.getItems()) System.out.println(item.toString());
         entryPanel.removeAll();
         buttons.clear();
+        entryPanel.setLayout(new GridLayout(0, 1));
         for (CalendarListEntry entry : calList.getItems()) addButton(entry);
         entryButtonGroup.clearSelection();
     }
