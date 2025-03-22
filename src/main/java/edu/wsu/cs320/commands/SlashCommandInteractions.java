@@ -1,7 +1,9 @@
 package edu.wsu.cs320.commands;
 
+import com.google.api.client.util.DateTime;
 import com.google.api.services.calendar.model.CalendarListEntry;
 import com.google.api.services.calendar.model.Event;
+import com.google.api.services.calendar.model.EventDateTime;
 import de.jcm.discordgamesdk.activity.Activity;
 import de.jcm.discordgamesdk.activity.ActivityType;
 import edu.wsu.cs320.RP.Presence;
@@ -26,6 +28,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.time.Instant;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -125,7 +128,7 @@ public class SlashCommandInteractions extends ListenerAdapter {
                         throw new RuntimeException(e);
                     }
                     if (!events.isEmpty()){
-                        event.reply("**EVENT INFO: **\n"+ events.get(0).toString()).setEphemeral(true).queue();
+                        event.reply("**EVENT INFO: **\n"+ events.get(0).toString() + "\n" + events.get(0).getEnd().toString()).setEphemeral(true).queue();
                     } else {
                         event.reply("No upcoming events.").setEphemeral(true).queue();
                     }
@@ -166,7 +169,7 @@ public class SlashCommandInteractions extends ListenerAdapter {
                     } catch (IOException e) {
                         throw new RuntimeException(e);
                     }
-                    if (events.size() != 0){
+                    if (!events.isEmpty()){
                         event.reply("Next event: **"+ events.get(0).getSummary() +"**").setEphemeral(true).queue();
                     } else {
                         event.reply("No upcoming events.").setEphemeral(true).queue();
@@ -190,17 +193,27 @@ public class SlashCommandInteractions extends ListenerAdapter {
                     if (!events.isEmpty() && events.size() > eventCount){
                         eventCount++;
                         event.reply("Event changed to: **"+ events.get(eventCount - 1).getSummary() + "**").setEphemeral(true).queue();
-                        Activity activityState = richPresence.getActivityState();
-                        Event eventF = events.get(0);
-                        activityState.setDetails(eventF.getSummary());
-                        if (eventF.getDescription() != null){
-                            activityState.setState(eventF.getDescription());
-                        }
-                        if (eventF.getStart().getDateTime() != null){
-                            activityState.timestamps().setStart(Instant.ofEpochMilli(eventF.getStart().getDateTime().getValue()));
-                            activityState.timestamps().setEnd(Instant.ofEpochMilli(eventF.getEnd().getDateTime().getValue()));
-                        }
-                        richPresence.setActivityState(activityState);
+
+                        // Format Datetime to string ( it seems counterintuitive but is needed
+                        String time = events.get(eventCount - 1).getEnd().toString();
+                        time = time.substring(1, time.length() - 1);
+                        String[] dateTime = time.split("\"");
+
+                        String format = dateTime[1];
+                        String endTime = dateTime[3];
+                        richPresence.pauseEventUpdates(format, endTime);
+
+                        Instant nowUtc = Instant.now();
+
+                        // Change the start time to now
+                        DateTimeFormatter formatter = DateTimeFormatter.ISO_INSTANT;
+                        String formattedNow = formatter.format(nowUtc);
+                        DateTime dateTimeEvent = new DateTime(formattedNow);
+                        EventDateTime eventDateTime = new EventDateTime().setDateTime(dateTimeEvent);
+
+                        Event eventF = events.get(eventCount - 1);
+                        eventF.setStart(eventDateTime);
+                        richPresence.calendarEventUpdater(eventF);
                     } else {
                         event.reply("No more upcoming events.").setEphemeral(true).queue();
                     }
@@ -271,12 +284,12 @@ public class SlashCommandInteractions extends ListenerAdapter {
         }
 
 
-        String[] commandList = { "event_info","presence_type", "show_next_event","next_event", "select_calendar"};
+        String[] commandList = {"event_info","presence_type", "show_next_event","next_event", "select_calendar"};
         String[] commandDescriptions = {
                 "Debugging command",
                 "Changes Presence Type",
                 "Shows next calendar event",
-                "Sets status to next event in selected calendar",
+                "Immediately displays the next calendar event",
                 "Select a calendar to display"
         };
         OptionData[] options = {null, PresenceType, null, null , null};

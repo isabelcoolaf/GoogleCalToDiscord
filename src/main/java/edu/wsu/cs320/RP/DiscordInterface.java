@@ -1,6 +1,5 @@
 package edu.wsu.cs320.RP;
 
-import com.google.api.services.calendar.model.Calendar;
 import edu.wsu.cs320.GoogleCalToDiscord;
 import edu.wsu.cs320.commands.SlashCommandInteractions;
 import edu.wsu.cs320.googleapi.GoogleCalendarServiceHandler;
