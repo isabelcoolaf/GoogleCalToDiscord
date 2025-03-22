@@ -107,7 +107,7 @@ public class CalendarSelectorTest {
         assertNoButtons();
         // no button -> one button
         feedOneButton();
-        assertNoButtons();
+        assertOneButton();
     }
 
     // Tests condition for when a multiple-list entry is replaces by a one-list entry and vice versa
