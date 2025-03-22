@@ -61,6 +61,7 @@ public class GuiController {
      */
     public GuiResponse<CalendarListEntry> getCalendarFromList(CalendarList cals) {
         CalendarSelector selector = new CalendarSelector();
+        openGUI(selector);
         selector.feedCalendarList(cals);
         GuiResponse<CalendarListEntry> resp = selector.getResponse();
         closeGUI();
