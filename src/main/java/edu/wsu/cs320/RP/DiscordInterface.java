@@ -6,15 +6,17 @@ import edu.wsu.cs320.commands.SlashCommandInteractions;
 import edu.wsu.cs320.googleapi.GoogleCalendarServiceHandler;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
+import net.dv8tion.jda.api.entities.User;
 
 import java.io.IOException;
 
 public class DiscordInterface extends Thread{
-    private final String ID, Token;
+    private final String id, token;
     private SlashCommandInteractions commands;
+    private JDA bot;
     public DiscordInterface(String id, String token){
-        ID = id;
-        Token = token;
+        this.id = id;
+        this.token = token;
     }
 
     public void setCurCalendar(Calendar googleCal){
@@ -25,27 +27,31 @@ public class DiscordInterface extends Thread{
 
     @Override
     public void run(){
-        if (Token == null || ID == null) {
+        if (this.token == null || this.id == null) {
             System.out.println("Bot Token or Application Id was not supplied: will not run interface!");
             return;
         }
 
         GoogleCalendarServiceHandler calHandler = new GoogleCalendarServiceHandler(GoogleCalToDiscord.googleOAuthManager.getCredentials());
 
-        Presence presence = new Presence(ID);
+        Presence presence = new Presence(this.id);
         commands = new SlashCommandInteractions(presence);
         commands.setGoogleCalendarHandler(calHandler);
 
         // Bot token for using slash commands
-        JDA bot = JDABuilder.createDefault(Token)
+        this.bot = JDABuilder.createDefault(this.token)
                 .addEventListeners(commands)
                 .build();
 
         try {
             presence.Activity();
-        } catch (
-                IOException e) {
+        } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public void sendMessageToUser(long userID, String message) {
+        User user = this.bot.retrieveUserById(userID).complete();
+        user.openPrivateChannel().map((chan) -> chan.sendMessage(message)).complete().queue();
     }
 }

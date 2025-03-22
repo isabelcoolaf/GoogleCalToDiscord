@@ -14,6 +14,7 @@ import java.io.IOException;
 public class GoogleCalToDiscord {
 
     public static GoogleOAuthManager googleOAuthManager;
+    public static DiscordInterface discordInterface;
     public static ConfigManager config;
 
     public static void main(String[] args) throws IOException {
@@ -27,7 +28,7 @@ public class GoogleCalToDiscord {
         googleOAuthManager = new GoogleOAuthManager(googleClientID, googleClientSecret, googleRefreshToken, ConfigValues.CONFIG_FILENAME);
 
         if (discordClientID != null && discordBotToken != null) {
-            DiscordInterface discordInterface = new DiscordInterface(discordClientID, discordBotToken);
+            discordInterface = new DiscordInterface(discordClientID, discordBotToken);
             discordInterface.start();
         }
 

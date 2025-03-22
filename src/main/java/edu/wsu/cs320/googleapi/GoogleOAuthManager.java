@@ -59,7 +59,7 @@ public class GoogleOAuthManager {
             return UserCredentials.newBuilder()
                     .setClientId(this.clientID)
                     .setClientSecret(this.clientSecret)
-                    .setRefreshToken(refreshToken)
+                    .setRefreshToken(this.refreshToken)
                     .build();
         } catch (Exception ignored) {
             return null;
