@@ -1,6 +1,5 @@
 package edu.wsu.cs320.RP;
 
-import com.google.api.services.calendar.model.Calendar;
 import edu.wsu.cs320.GoogleCalToDiscord;
 import edu.wsu.cs320.commands.SlashCommandInteractions;
 import edu.wsu.cs320.googleapi.GoogleCalendarServiceHandler;
@@ -19,9 +18,9 @@ public class DiscordInterface extends Thread{
         this.token = token;
     }
 
-    public void setCurCalendar(Calendar googleCal){
+    public void setCurCalendar(String googleCalID){
         if (commands != null){
-            commands.setCurrentCalendar(googleCal);
+            commands.setCurrentCalendar(googleCalID);
         }
     }
 

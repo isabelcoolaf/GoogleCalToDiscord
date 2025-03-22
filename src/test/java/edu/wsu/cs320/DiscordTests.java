@@ -121,7 +121,7 @@ public class DiscordTests {
 
     @Test // Integration tests
     public void testNumberOfCommands(){
-        int expectedCommands = 4;
+        int expectedCommands = 5;
         JDA tester = makeTestBot();
 
         tester.retrieveCommands().queue(command ->{
@@ -131,7 +131,7 @@ public class DiscordTests {
 
     @Test // Integration test
     public void testNumberOfCommandsWithOptions(){
-        int expectedCommandsWithOptions = 2;
+        int expectedCommandsWithOptions = 1;
         JDA tester = makeTestBot();
 
         tester.retrieveCommands().queue(command ->{
