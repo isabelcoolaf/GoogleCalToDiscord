@@ -8,11 +8,14 @@ import edu.wsu.cs320.googleapi.GoogleCalendarServiceHandler;
 import edu.wsu.cs320.googleapi.GoogleOAuthManager;
 import edu.wsu.cs320.gui.control.GuiController;
 import edu.wsu.cs320.gui.control.GuiResponse;
+import edu.wsu.cs320.RP.DiscordInterface;
+
 import java.io.IOException;
 
 public class GoogleCalToDiscord {
 
     public static GoogleOAuthManager googleOAuthManager;
+    public static DiscordInterface discordInterface;
     public static ConfigManager config;
 
     public static void main(String[] args) throws IOException {
@@ -26,10 +29,10 @@ public class GoogleCalToDiscord {
 
         googleOAuthManager = new GoogleOAuthManager(googleClientID, googleClientSecret, googleRefreshToken, ConfigValues.CONFIG_FILENAME);
 
-//        if (discordClientID != null && discordBotToken != null) {
-//            DiscordInterface discordInterface = new DiscordInterface(discordClientID, discordBotToken);
-//            discordInterface.start();
-//        }
+        if (discordClientID != null && discordBotToken != null) {
+            discordInterface = new DiscordInterface(discordClientID, discordBotToken);
+            discordInterface.start();
+        }
 
         if (googleOAuthManager.isAuthenticated()) {
             System.out.println("GOOGLE AUTHENTICATION SUCCESSFUL");

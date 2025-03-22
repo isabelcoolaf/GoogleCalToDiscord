@@ -1,12 +1,12 @@
 package edu.wsu.cs320.RP;
 
-
 import com.google.api.client.util.DateTime;
 import com.google.api.services.calendar.model.Event;
 import de.jcm.discordgamesdk.Core;
 import de.jcm.discordgamesdk.CreateParams;
 import de.jcm.discordgamesdk.activity.Activity;
 import de.jcm.discordgamesdk.activity.ActivityType;
+import de.jcm.discordgamesdk.user.DiscordUser;
 import edu.wsu.cs320.config.ConfigValues;
 import edu.wsu.cs320.googleapi.CalendarPollingService;
 import edu.wsu.cs320.googleapi.GoogleCalendarServiceHandler;
@@ -17,6 +17,7 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
+import java.util.List;
 
 import edu.wsu.cs320.GoogleCalToDiscord;
 
@@ -131,8 +132,41 @@ public class Presence {
                         }
                     }
                     core.runCallbacks();
+
+                    // Handle current event
+                    Event event = pollingService.getCurrentEvent();
+                    if (event != null) {
+                        try (Activity activity = new Activity()){
+                            activity.setType(ActivityType.WATCHING);
+                            activity.setDetails(event.getSummary());
+                            activity.setState(event.getDescription());
+                            activity.timestamps().setStart(Instant.ofEpochMilli(event.getStart().getDateTime().getValue()));
+                            activity.timestamps().setEnd(Instant.ofEpochMilli(event.getEnd().getDateTime().getValue()));
+                            RP = activity;
+                            core.activityManager().updateActivity(RP);
+                        }
+                    } else {
+                        try (Activity activity = new Activity()){
+                            activity.setType(ActivityType.WATCHING);
+                            activity.setDetails("No Current Event");
+                            activity.setState("Calendar empty at this timeslot");
+                            RP = activity;
+                            core.activityManager().updateActivity(RP);
+                        }
+                    }
+
+                    // Handle reminders
+                    List<Event> reminders = pollingService.getCurrentReminders();
+                    for (Event upcomingEvent : reminders) {
+                        String message = String.format(":bell: **Reminder:** %s :bell:\nYour event is starting <t:%d:R>\n[Link to event](<%s>)",
+                                upcomingEvent.getSummary(),
+                                upcomingEvent.getStart().getDateTime().getValue()/1000,
+                                upcomingEvent.getHtmlLink());
+                        GoogleCalToDiscord.discordInterface.sendMessageToUser(getCurrentUser().getUserId(), message);
+                    }
+
                     try {
-                        Thread.sleep(20);
+                        Thread.sleep(100);
                     }
                     catch(InterruptedException e) {
                         e.printStackTrace();
@@ -140,6 +174,10 @@ public class Presence {
                 }
             }
         }
+    }
+
+    public DiscordUser getCurrentUser() {
+        return this.updater.userManager().getCurrentUser();
     }
 
 }

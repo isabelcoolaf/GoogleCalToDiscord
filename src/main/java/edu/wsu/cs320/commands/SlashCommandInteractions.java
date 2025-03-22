@@ -170,7 +170,7 @@ public class SlashCommandInteractions extends ListenerAdapter {
                         throw new RuntimeException(e);
                     }
                     if (!events.isEmpty()){
-                        event.reply("Next event: **"+ events.get(0).getSummary() +"**").setEphemeral(true).queue();
+                        event.reply("Next event: **["+ events.get(0).getSummary() +"](" +events.get(0).getHtmlLink()+ ")**").setEphemeral(true).queue();
                     } else {
                         event.reply("No upcoming events.").setEphemeral(true).queue();
                     }
