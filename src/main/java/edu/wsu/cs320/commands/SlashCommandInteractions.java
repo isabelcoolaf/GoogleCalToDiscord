@@ -6,6 +6,7 @@ import com.google.api.services.calendar.model.Event;
 import com.google.api.services.calendar.model.EventDateTime;
 import de.jcm.discordgamesdk.activity.Activity;
 import de.jcm.discordgamesdk.activity.ActivityType;
+import edu.wsu.cs320.GoogleCalToDiscord;
 import edu.wsu.cs320.RP.Presence;
 import edu.wsu.cs320.config.ConfigManager;
 import edu.wsu.cs320.config.ConfigValues;
@@ -246,7 +247,6 @@ public class SlashCommandInteractions extends ListenerAdapter {
                 event.editMessage("Showing **" + selection + "**. Please select a calendar")
                         .setActionRow(getCalendarMenu(calendarNames)).queue();
             } else {
-                ConfigManager config = new ConfigManager(ConfigValues.CONFIG_FILENAME);
                 List<CalendarListEntry> calList = getCalList(calHandler);
                 String calID = null;
 
@@ -258,10 +258,12 @@ public class SlashCommandInteractions extends ListenerAdapter {
                 }
 
                 try {
-                    config.put(ConfigValues.GOOGLE_CALENDAR_ID, calID);
+                    GoogleCalToDiscord.config.put(ConfigValues.GOOGLE_CALENDAR_ID, calID);
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
+
+                richPresence.setPoll();
 
                 event.editMessage("**" + selection + "** is your selected calendar.").queue();
                 event.editSelectMenu(null).queue();
