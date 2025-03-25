@@ -38,7 +38,6 @@ public class SlashCommandInteractions extends ListenerAdapter {
     private final Presence richPresence;
     private String curCalendar;
     private GoogleCalendarServiceHandler calHandler;
-    private static int eventCount;
     private int pageNumber;
 
     // Presence required so that commands can alter the data of the activity
@@ -192,33 +191,35 @@ public class SlashCommandInteractions extends ListenerAdapter {
                     } catch (IOException e) {
                         throw new RuntimeException(e);
                     }
-                    if (!events.isEmpty() && events.size() > eventCount){
-                        eventCount++;
-                        event.reply("Event changed to: **"+ events.get(eventCount - 1).getSummary() + "**").setEphemeral(true).queue();
 
-                        // Format Datetime to string ( it seems counterintuitive but is needed
-                        String time = events.get(eventCount - 1).getEnd().toString();
-                        time = time.substring(1, time.length() - 1);
-                        String[] dateTime = time.split("\"");
-
-                        String format = dateTime[1];
-                        String endTime = dateTime[3];
-                        richPresence.pauseEventUpdates(format, endTime);
-
-                        Instant nowUtc = Instant.now();
-
-                        // Change the start time to now
-                        DateTimeFormatter formatter = DateTimeFormatter.ISO_INSTANT;
-                        String formattedNow = formatter.format(nowUtc);
-                        DateTime dateTimeEvent = new DateTime(formattedNow);
-                        EventDateTime eventDateTime = new EventDateTime().setDateTime(dateTimeEvent);
-
-                        Event eventF = events.get(eventCount - 1);
-                        eventF.setStart(eventDateTime);
-                        richPresence.calendarEventUpdater(eventF);
-                    } else {
-                        event.reply("No more upcoming events.").setEphemeral(true).queue();
+                    if (events.isEmpty()){
+                        event.reply("No upcoming events.").setEphemeral(true).queue();
+                        break;
                     }
+
+                    event.reply("Event changed to: **"+ events.get(0).getSummary() + "**").setEphemeral(true).queue();
+
+                    // Format Datetime to string ( it seems counterintuitive but is needed
+                    String time = events.get(0).getEnd().toString();
+                    time = time.substring(1, time.length() - 1);
+                    String[] dateTime = time.split("\"");
+
+                    String format = dateTime[1];
+                    String endTime = dateTime[3];
+                    richPresence.pauseEventUpdates(format, endTime);
+
+                    Instant nowUtc = Instant.now();
+
+                    // Change the start time to now
+                    DateTimeFormatter formatter = DateTimeFormatter.ISO_INSTANT;
+                    String formattedNow = formatter.format(nowUtc);
+                    DateTime dateTimeEvent = new DateTime(formattedNow);
+                    EventDateTime eventDateTime = new EventDateTime().setDateTime(dateTimeEvent);
+
+                    Event eventF = events.get(0);
+                    eventF.setStart(eventDateTime);
+                    richPresence.calendarEventUpdater(eventF);
+
                 }
                 break;
             case "select_calendar":

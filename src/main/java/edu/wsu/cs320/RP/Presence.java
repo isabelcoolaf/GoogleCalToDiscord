@@ -58,14 +58,14 @@ public class Presence {
             try {
                 OffsetDateTime offsetDateTime = OffsetDateTime.parse(end);
                 Instant instant = offsetDateTime.toInstant();
-                endTime =  instant.toEpochMilli() / 1000;
+                endTime =  instant.toEpochMilli();
 
             } catch (Exception e) {
                 System.err.println("Time Parse error: " + e.getMessage());
                 return;
             }
         }
-        if (endTime > Instant.now().toEpochMilli() / 1000) update = false;
+        if (endTime > Instant.now().toEpochMilli()) update = false;
         if (!update) System.out.println(" - Paused Status Updating - ");
     }
 
