@@ -29,6 +29,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -228,6 +229,21 @@ public class SlashCommandInteractions extends ListenerAdapter {
                     event.reply("Please select a calendar.").addActionRow(getCalendarMenu(calendarNames)).setEphemeral(true).queue();
                 }
                 break;
+            case "sleep":
+                OptionMapping sleepDays = event.getOption("days");
+                long response = sleepDays.getAsLong();
+
+                if (response < 0){
+                    event.reply("**"+response+"** is invalid. Days must be a positive number").setEphemeral(true).queue();
+                    break;
+                }
+
+                LocalDate sleepDate = LocalDate.now().plusDays(response);
+                richPresence.pauseEventUpdates("date", sleepDate.toString());
+                richPresence.calendarEventUpdater(null);
+
+                event.reply("Now sleeping for **" + response + "** days.").setEphemeral(true).queue();
+                break;
         }
     }
 
@@ -285,16 +301,19 @@ public class SlashCommandInteractions extends ListenerAdapter {
             PresenceType.addChoice(choice, choice);
         }
 
+        OptionData sleepTime = new OptionData(OptionType.INTEGER, "days", "Choose number of days to sleep", true);
 
-        String[] commandList = {"event_info","presence_type", "show_next_event","next_event", "select_calendar"};
+
+        String[] commandList = {"event_info","presence_type", "show_next_event","next_event", "select_calendar", "sleep"};
         String[] commandDescriptions = {
                 "Debugging command",
                 "Changes Presence Type",
                 "Shows next calendar event",
                 "Immediately displays the next calendar event",
-                "Select a calendar to display"
+                "Select a calendar to display",
+                "Stops updating events for selected amount of time"
         };
-        OptionData[] options = {null, PresenceType, null, null , null};
+        OptionData[] options = {null, PresenceType, null, null , null, sleepTime};
         for (int i = 0; i < commandList.length; i++) {
             if (options[i] != null){
                 commands.add(Commands.slash(commandList[i], commandDescriptions[i])

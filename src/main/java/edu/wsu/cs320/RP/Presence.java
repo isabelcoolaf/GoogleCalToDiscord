@@ -7,7 +7,6 @@ import de.jcm.discordgamesdk.CreateParams;
 import de.jcm.discordgamesdk.activity.Activity;
 import de.jcm.discordgamesdk.activity.ActivityType;
 import de.jcm.discordgamesdk.user.DiscordUser;
-import edu.wsu.cs320.config.ConfigManager;
 import edu.wsu.cs320.config.ConfigValues;
 import edu.wsu.cs320.googleapi.CalendarPollingService;
 import edu.wsu.cs320.googleapi.GoogleCalendarServiceHandler;
@@ -46,7 +45,6 @@ public class Presence {
         if (poll != null) poll.stop();
         GoogleCalendarServiceHandler handler = new GoogleCalendarServiceHandler(GoogleCalToDiscord.googleOAuthManager.getCredentials());
         CalendarPollingService pollingService = new CalendarPollingService(handler, GoogleCalToDiscord.config.get(ConfigValues.GOOGLE_CALENDAR_ID));
-        System.out.println("CALID: " + GoogleCalToDiscord.config.get(ConfigValues.GOOGLE_CALENDAR_ID));
         pollingService.start();
         poll = pollingService;
     }
@@ -68,14 +66,15 @@ public class Presence {
             }
         }
         if (endTime > Instant.now().toEpochMilli() / 1000) update = false;
-        if (!update) System.out.println(" Paused Updating");
+        if (!update) System.out.println(" - Paused Status Updating - ");
     }
 
     private long checkTime(long end){
         if (!update && end != 0){
-            update = end <= Instant.now().toEpochMilli() / 1000;
+            update = end <= Instant.now().toEpochMilli();
             if (update){
                 lastEvent = new Event();
+                System.out.println(" - Resumed Status Updating - ");
                 return 0;
             }
         }
