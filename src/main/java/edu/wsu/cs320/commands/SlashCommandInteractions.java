@@ -114,7 +114,7 @@ public class SlashCommandInteractions extends ListenerAdapter {
     public void onSlashCommandInteraction(@NotNull SlashCommandInteractionEvent event) {
         System.out.println("Command used \"" + event.getName() + "\"");
         switch (event.getName()) {
-            case "event_info":
+            case "event-info":
                 ConfigManager config = new ConfigManager(ConfigValues.CONFIG_FILENAME);
                 curCalendar = config.get(ConfigValues.GOOGLE_CALENDAR_ID);
                 if (calHandler == null){
@@ -135,7 +135,7 @@ public class SlashCommandInteractions extends ListenerAdapter {
                     }
                 }
                 break;
-            case "presence_type":
+            case "presence-type":
                 OptionMapping presenceOptions = event.getOption("presence_type");
                 String presenceResponse = presenceOptions.getAsString();
 
@@ -156,7 +156,7 @@ public class SlashCommandInteractions extends ListenerAdapter {
                 event.reply("Changed presence type to: " + presenceResponse).setEphemeral(true).queue();
                 break;
 
-            case "show_next_event":
+            case "next-event":
                 ConfigManager config3 = new ConfigManager(ConfigValues.CONFIG_FILENAME);
                 curCalendar = config3.get(ConfigValues.GOOGLE_CALENDAR_ID);
                 if (calHandler == null){
@@ -177,7 +177,7 @@ public class SlashCommandInteractions extends ListenerAdapter {
                     }
                 }
                 break;
-            case "next_event":
+            case "start-next-event":
                 ConfigManager config2 = new ConfigManager(ConfigValues.CONFIG_FILENAME);
                 curCalendar = config2.get(ConfigValues.GOOGLE_CALENDAR_ID);
                 if (calHandler == null){
@@ -199,7 +199,7 @@ public class SlashCommandInteractions extends ListenerAdapter {
 
                     event.reply("Event changed to: **"+ events.get(0).getSummary() + "**").setEphemeral(true).queue();
 
-                    // Format Datetime to string ( it seems counterintuitive but is needed
+                    // Format Datetime to string ( it seems counterintuitive but is needed )
                     String time = events.get(0).getEnd().toString();
                     time = time.substring(1, time.length() - 1);
                     String[] dateTime = time.split("\"");
@@ -222,7 +222,7 @@ public class SlashCommandInteractions extends ListenerAdapter {
 
                 }
                 break;
-            case "select_calendar":
+            case "select-calendar":
                 if (calHandler == null) {
                     event.reply("Google Calendar not authenticated! Please sign in first.").setEphemeral(true).queue();
                 } else {
@@ -296,7 +296,7 @@ public class SlashCommandInteractions extends ListenerAdapter {
 
         // names must be lowercase
         // command names must match command functionality options
-        OptionData PresenceType = new OptionData(OptionType.STRING, "presence_type", "Select the presence type", true);
+        OptionData PresenceType = new OptionData(OptionType.STRING, "presence-type", "Select the presence type", true);
         String[] choices = {"Playing", "Watching", "Listening", "Competing"};
         for (String choice : choices) {
             PresenceType.addChoice(choice, choice);
@@ -305,16 +305,16 @@ public class SlashCommandInteractions extends ListenerAdapter {
         OptionData sleepTime = new OptionData(OptionType.INTEGER, "days", "Choose number of days to sleep", true);
 
 
-        String[] commandList = {"event_info","presence_type", "show_next_event","next_event", "select_calendar", "sleep"};
+        String[] commandList = {"event-info", "presence-type", "next-event", "start-next-event", "select-calendar", "sleep"};
         String[] commandDescriptions = {
                 "Debugging command",
                 "Changes Presence Type",
                 "Shows next calendar event",
                 "Immediately displays the next calendar event",
                 "Select a calendar to display",
-                "Stops updating events for selected amount of time"
+                "Stops updating events for selected amount of time",
         };
-        OptionData[] options = {null, PresenceType, null, null , null, sleepTime};
+        OptionData[] options = {null, PresenceType, null, null, null, sleepTime};
         for (int i = 0; i < commandList.length; i++) {
             if (options[i] != null){
                 commands.add(Commands.slash(commandList[i], commandDescriptions[i])

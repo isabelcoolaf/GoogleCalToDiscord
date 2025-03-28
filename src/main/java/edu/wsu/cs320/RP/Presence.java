@@ -26,13 +26,12 @@ public class Presence {
     private Activity RP;
     private Core updater;
     private Boolean update = true;
-    private  Event lastEvent;
+    private Event lastEvent;
     private long endTime;
     private CalendarPollingService poll;
     public Presence(String ID){
         appID = ID;
     }
-
     public Activity getActivityState(){
         return RP;
     }
@@ -108,8 +107,6 @@ public class Presence {
     }
 
     public void Activity() throws IOException{
-
-        // application ID
         BigInteger ID = new BigInteger(appID);
 
         try(CreateParams params = new CreateParams()){
@@ -123,7 +120,7 @@ public class Presence {
                 Event eventStart = poll.getCurrentEvent();
                 calendarEventUpdater(eventStart);
 
-                // DO NOT TOUCH THIS LOOP (it will break things)
+                // TOUCH THIS LOOP (it will break things)
                 lastEvent = eventStart;
                 while(true) {
                     // check time to re-enable calendar updating
@@ -152,7 +149,7 @@ public class Presence {
                     }
 
                     try {
-                        Thread.sleep(100);
+                        Thread.sleep(20);
                     }
                     catch(InterruptedException e) {
                         e.printStackTrace();
