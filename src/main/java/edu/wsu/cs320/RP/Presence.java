@@ -26,18 +26,26 @@ public class Presence {
     private Activity RP;
     private Core updater;
     private Boolean update = true;
-    private  Event lastEvent;
+    private Event lastEvent;
     private long endTime;
+    private CalendarPollingService poll;
     public Presence(String ID){
         appID = ID;
     }
-
     public Activity getActivityState(){
         return RP;
     }
     public void setActivityState(Activity state){
         RP = state;
         updater.activityManager().updateActivity(RP);
+    }
+
+    public void setPoll(){
+        if (poll != null) poll.stop();
+        GoogleCalendarServiceHandler handler = new GoogleCalendarServiceHandler(GoogleCalToDiscord.googleOAuthManager.getCredentials());
+        CalendarPollingService pollingService = new CalendarPollingService(handler, GoogleCalToDiscord.config.get(ConfigValues.GOOGLE_CALENDAR_ID));
+        pollingService.start();
+        poll = pollingService;
     }
 
     public void pauseEventUpdates(String type, String end){
@@ -49,22 +57,23 @@ public class Presence {
             try {
                 OffsetDateTime offsetDateTime = OffsetDateTime.parse(end);
                 Instant instant = offsetDateTime.toInstant();
-                endTime =  instant.toEpochMilli() / 1000;
+                endTime =  instant.toEpochMilli();
 
             } catch (Exception e) {
                 System.err.println("Time Parse error: " + e.getMessage());
                 return;
             }
         }
-        if (endTime > Instant.now().toEpochMilli() / 1000) update = false;
-        if (!update) System.out.println(" Paused Updating");
+        if (endTime > Instant.now().toEpochMilli()) update = false;
+        if (!update) System.out.println(" - Paused Status Updating - ");
     }
 
     private long checkTime(long end){
         if (!update && end != 0){
-            update = end <= Instant.now().toEpochMilli() / 1000;
+            update = end <= Instant.now().toEpochMilli();
             if (update){
                 lastEvent = new Event();
+                System.out.println(" - Resumed Status Updating - ");
                 return 0;
             }
         }
@@ -98,8 +107,6 @@ public class Presence {
     }
 
     public void Activity() throws IOException{
-
-        // application ID
         BigInteger ID = new BigInteger(appID);
 
         try(CreateParams params = new CreateParams()){
@@ -108,21 +115,19 @@ public class Presence {
 
             try(Core core = new Core(params)){
                 updater = core;
-                GoogleCalendarServiceHandler handler = new GoogleCalendarServiceHandler(GoogleCalToDiscord.googleOAuthManager.getCredentials());
-                CalendarPollingService pollingService = new CalendarPollingService(handler, GoogleCalToDiscord.config.get(ConfigValues.GOOGLE_CALENDAR_ID));
-                pollingService.start();
+                setPoll();
 
-                Event eventStart = pollingService.getCurrentEvent();
+                Event eventStart = poll.getCurrentEvent();
                 calendarEventUpdater(eventStart);
 
-                // DO NOT TOUCH THIS LOOP (it will break things)
+                // TOUCH THIS LOOP (it will break things)
                 lastEvent = eventStart;
                 while(true) {
                     // check time to re-enable calendar updating
                     endTime = checkTime(endTime);
                     if (update){
                         // Does not update the activity unless the event has changed
-                        Event event = pollingService.getCurrentEvent();
+                        Event event = poll.getCurrentEvent();
                         if (event != null && !event.equals(lastEvent)){
                             lastEvent = event;
                             calendarEventUpdater(event);
@@ -133,30 +138,8 @@ public class Presence {
                     }
                     core.runCallbacks();
 
-                    // Handle current event
-                    Event event = pollingService.getCurrentEvent();
-                    if (event != null) {
-                        try (Activity activity = new Activity()){
-                            activity.setType(ActivityType.WATCHING);
-                            activity.setDetails(event.getSummary());
-                            activity.setState(event.getDescription());
-                            activity.timestamps().setStart(Instant.ofEpochMilli(event.getStart().getDateTime().getValue()));
-                            activity.timestamps().setEnd(Instant.ofEpochMilli(event.getEnd().getDateTime().getValue()));
-                            RP = activity;
-                            core.activityManager().updateActivity(RP);
-                        }
-                    } else {
-                        try (Activity activity = new Activity()){
-                            activity.setType(ActivityType.WATCHING);
-                            activity.setDetails("No Current Event");
-                            activity.setState("Calendar empty at this timeslot");
-                            RP = activity;
-                            core.activityManager().updateActivity(RP);
-                        }
-                    }
-
                     // Handle reminders
-                    List<Event> reminders = pollingService.getCurrentReminders();
+                    List<Event> reminders = poll.getCurrentReminders();
                     for (Event upcomingEvent : reminders) {
                         String message = String.format(":bell: **Reminder:** %s :bell:\nYour event is starting <t:%d:R>\n[Link to event](<%s>)",
                                 upcomingEvent.getSummary(),
@@ -166,7 +149,7 @@ public class Presence {
                     }
 
                     try {
-                        Thread.sleep(100);
+                        Thread.sleep(20);
                     }
                     catch(InterruptedException e) {
                         e.printStackTrace();

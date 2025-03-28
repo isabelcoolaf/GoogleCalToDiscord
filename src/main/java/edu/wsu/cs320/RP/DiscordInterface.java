@@ -37,7 +37,6 @@ public class DiscordInterface extends Thread{
         commands = new SlashCommandInteractions(presence);
         commands.setGoogleCalendarHandler(calHandler);
 
-        // Bot token for using slash commands
         this.bot = JDABuilder.createDefault(this.token)
                 .addEventListeners(commands)
                 .build();

@@ -6,6 +6,7 @@ import com.google.api.services.calendar.model.Event;
 import com.google.api.services.calendar.model.EventDateTime;
 import de.jcm.discordgamesdk.activity.Activity;
 import de.jcm.discordgamesdk.activity.ActivityType;
+import edu.wsu.cs320.GoogleCalToDiscord;
 import edu.wsu.cs320.RP.Presence;
 import edu.wsu.cs320.config.ConfigManager;
 import edu.wsu.cs320.config.ConfigValues;
@@ -28,6 +29,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -36,7 +38,6 @@ public class SlashCommandInteractions extends ListenerAdapter {
     private final Presence richPresence;
     private String curCalendar;
     private GoogleCalendarServiceHandler calHandler;
-    private static int eventCount;
     private int pageNumber;
 
     // Presence required so that commands can alter the data of the activity
@@ -113,7 +114,7 @@ public class SlashCommandInteractions extends ListenerAdapter {
     public void onSlashCommandInteraction(@NotNull SlashCommandInteractionEvent event) {
         System.out.println("Command used \"" + event.getName() + "\"");
         switch (event.getName()) {
-            case "event_info":
+            case "event-info":
                 ConfigManager config = new ConfigManager(ConfigValues.CONFIG_FILENAME);
                 curCalendar = config.get(ConfigValues.GOOGLE_CALENDAR_ID);
                 if (calHandler == null){
@@ -134,7 +135,7 @@ public class SlashCommandInteractions extends ListenerAdapter {
                     }
                 }
                 break;
-            case "presence_type":
+            case "presence-type":
                 OptionMapping presenceOptions = event.getOption("presence_type");
                 String presenceResponse = presenceOptions.getAsString();
 
@@ -155,7 +156,7 @@ public class SlashCommandInteractions extends ListenerAdapter {
                 event.reply("Changed presence type to: " + presenceResponse).setEphemeral(true).queue();
                 break;
 
-            case "show_next_event":
+            case "next-event":
                 ConfigManager config3 = new ConfigManager(ConfigValues.CONFIG_FILENAME);
                 curCalendar = config3.get(ConfigValues.GOOGLE_CALENDAR_ID);
                 if (calHandler == null){
@@ -176,7 +177,7 @@ public class SlashCommandInteractions extends ListenerAdapter {
                     }
                 }
                 break;
-            case "next_event":
+            case "start-next-event":
                 ConfigManager config2 = new ConfigManager(ConfigValues.CONFIG_FILENAME);
                 curCalendar = config2.get(ConfigValues.GOOGLE_CALENDAR_ID);
                 if (calHandler == null){
@@ -190,42 +191,59 @@ public class SlashCommandInteractions extends ListenerAdapter {
                     } catch (IOException e) {
                         throw new RuntimeException(e);
                     }
-                    if (!events.isEmpty() && events.size() > eventCount){
-                        eventCount++;
-                        event.reply("Event changed to: **"+ events.get(eventCount - 1).getSummary() + "**").setEphemeral(true).queue();
 
-                        // Format Datetime to string ( it seems counterintuitive but is needed
-                        String time = events.get(eventCount - 1).getEnd().toString();
-                        time = time.substring(1, time.length() - 1);
-                        String[] dateTime = time.split("\"");
-
-                        String format = dateTime[1];
-                        String endTime = dateTime[3];
-                        richPresence.pauseEventUpdates(format, endTime);
-
-                        Instant nowUtc = Instant.now();
-
-                        // Change the start time to now
-                        DateTimeFormatter formatter = DateTimeFormatter.ISO_INSTANT;
-                        String formattedNow = formatter.format(nowUtc);
-                        DateTime dateTimeEvent = new DateTime(formattedNow);
-                        EventDateTime eventDateTime = new EventDateTime().setDateTime(dateTimeEvent);
-
-                        Event eventF = events.get(eventCount - 1);
-                        eventF.setStart(eventDateTime);
-                        richPresence.calendarEventUpdater(eventF);
-                    } else {
-                        event.reply("No more upcoming events.").setEphemeral(true).queue();
+                    if (events.isEmpty()){
+                        event.reply("No upcoming events.").setEphemeral(true).queue();
+                        break;
                     }
+
+                    event.reply("Event changed to: **"+ events.get(0).getSummary() + "**").setEphemeral(true).queue();
+
+                    // Format Datetime to string ( it seems counterintuitive but is needed )
+                    String time = events.get(0).getEnd().toString();
+                    time = time.substring(1, time.length() - 1);
+                    String[] dateTime = time.split("\"");
+
+                    String format = dateTime[1];
+                    String endTime = dateTime[3];
+                    richPresence.pauseEventUpdates(format, endTime);
+
+                    Instant nowUtc = Instant.now();
+
+                    // Change the start time to now
+                    DateTimeFormatter formatter = DateTimeFormatter.ISO_INSTANT;
+                    String formattedNow = formatter.format(nowUtc);
+                    DateTime dateTimeEvent = new DateTime(formattedNow);
+                    EventDateTime eventDateTime = new EventDateTime().setDateTime(dateTimeEvent);
+
+                    Event eventF = events.get(0);
+                    eventF.setStart(eventDateTime);
+                    richPresence.calendarEventUpdater(eventF);
+
                 }
                 break;
-            case "select_calendar":
+            case "select-calendar":
                 if (calHandler == null) {
                     event.reply("Google Calendar not authenticated! Please sign in first.").setEphemeral(true).queue();
                 } else {
                     List<String> calendarNames = getCalendarNames(getCalList(calHandler));
                     event.reply("Please select a calendar.").addActionRow(getCalendarMenu(calendarNames)).setEphemeral(true).queue();
                 }
+                break;
+            case "sleep":
+                OptionMapping sleepDays = event.getOption("days");
+                long response = sleepDays.getAsLong();
+
+                if (response < 0){
+                    event.reply("**"+response+"** is invalid. Days must be a positive number").setEphemeral(true).queue();
+                    break;
+                }
+
+                LocalDate sleepDate = LocalDate.now().plusDays(response);
+                richPresence.pauseEventUpdates("date", sleepDate.toString());
+                richPresence.calendarEventUpdater(null);
+
+                event.reply("Now sleeping for **" + response + "** days.").setEphemeral(true).queue();
                 break;
         }
     }
@@ -246,7 +264,6 @@ public class SlashCommandInteractions extends ListenerAdapter {
                 event.editMessage("Showing **" + selection + "**. Please select a calendar")
                         .setActionRow(getCalendarMenu(calendarNames)).queue();
             } else {
-                ConfigManager config = new ConfigManager(ConfigValues.CONFIG_FILENAME);
                 List<CalendarListEntry> calList = getCalList(calHandler);
                 String calID = null;
 
@@ -258,10 +275,12 @@ public class SlashCommandInteractions extends ListenerAdapter {
                 }
 
                 try {
-                    config.put(ConfigValues.GOOGLE_CALENDAR_ID, calID);
+                    GoogleCalToDiscord.config.put(ConfigValues.GOOGLE_CALENDAR_ID, calID);
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
+
+                richPresence.setPoll();
 
                 event.editMessage("**" + selection + "** is your selected calendar.").queue();
                 event.editSelectMenu(null).queue();
@@ -277,22 +296,25 @@ public class SlashCommandInteractions extends ListenerAdapter {
 
         // names must be lowercase
         // command names must match command functionality options
-        OptionData PresenceType = new OptionData(OptionType.STRING, "presence_type", "Select the presence type", true);
+        OptionData PresenceType = new OptionData(OptionType.STRING, "presence-type", "Select the presence type", true);
         String[] choices = {"Playing", "Watching", "Listening", "Competing"};
         for (String choice : choices) {
             PresenceType.addChoice(choice, choice);
         }
 
+        OptionData sleepTime = new OptionData(OptionType.INTEGER, "days", "Choose number of days to sleep", true);
 
-        String[] commandList = {"event_info","presence_type", "show_next_event","next_event", "select_calendar"};
+
+        String[] commandList = {"event-info", "presence-type", "next-event", "start-next-event", "select-calendar", "sleep"};
         String[] commandDescriptions = {
                 "Debugging command",
                 "Changes Presence Type",
                 "Shows next calendar event",
                 "Immediately displays the next calendar event",
-                "Select a calendar to display"
+                "Select a calendar to display",
+                "Stops updating events for selected amount of time",
         };
-        OptionData[] options = {null, PresenceType, null, null , null};
+        OptionData[] options = {null, PresenceType, null, null, null, sleepTime};
         for (int i = 0; i < commandList.length; i++) {
             if (options[i] != null){
                 commands.add(Commands.slash(commandList[i], commandDescriptions[i])
