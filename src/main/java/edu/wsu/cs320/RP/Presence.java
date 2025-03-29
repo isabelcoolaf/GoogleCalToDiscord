@@ -20,6 +20,7 @@ import java.time.ZoneOffset;
 import java.util.List;
 
 import edu.wsu.cs320.GoogleCalToDiscord;
+import org.jsoup.Jsoup;
 
 public class Presence {
     private String appID;
@@ -85,7 +86,7 @@ public class Presence {
             try (Activity activity = new Activity()){
                 activity.setType(ActivityType.WATCHING);
                 activity.setDetails(event.getSummary());
-                activity.setState(event.getDescription());
+                activity.setState(Jsoup.parse(event.getDescription()).text());
                 DateTime start = event.getStart().getDateTime();
                 DateTime end = event.getEnd().getDateTime();
                 if (start != null && end != null){
