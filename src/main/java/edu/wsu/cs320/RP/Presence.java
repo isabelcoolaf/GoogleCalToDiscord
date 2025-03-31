@@ -29,6 +29,7 @@ public class Presence {
     private Boolean update = true;
     private Event lastEvent;
     private long endTime;
+    private boolean running = true;
     private CalendarPollingService poll;
     public Presence(String ID){
         appID = ID;
@@ -40,6 +41,7 @@ public class Presence {
         RP = state;
         updater.activityManager().updateActivity(RP);
     }
+    public void stopRunning(){running = false;}
 
     public void setPoll(){
         if (poll != null) poll.stop();
@@ -123,7 +125,7 @@ public class Presence {
 
                 // TOUCH THIS LOOP (it will break things)
                 lastEvent = eventStart;
-                while(true) {
+                while(running) {
                     // check time to re-enable calendar updating
                     endTime = checkTime(endTime);
                     if (update){
@@ -156,6 +158,7 @@ public class Presence {
                         e.printStackTrace();
                     }
                 }
+                poll.stop();
             }
         }
     }

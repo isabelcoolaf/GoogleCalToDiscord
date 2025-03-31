@@ -23,6 +23,9 @@ public class DiscordInterface extends Thread{
             commands.setCurrentCalendar(googleCalID);
         }
     }
+    public void killBot(){
+        bot.shutdown();
+    }
 
     @Override
     public void run(){
@@ -34,7 +37,7 @@ public class DiscordInterface extends Thread{
         GoogleCalendarServiceHandler calHandler = new GoogleCalendarServiceHandler(GoogleCalToDiscord.googleOAuthManager.getCredentials());
 
         Presence presence = new Presence(this.id);
-        commands = new SlashCommandInteractions(presence);
+        commands = new SlashCommandInteractions(presence, this);
         commands.setGoogleCalendarHandler(calHandler);
 
         this.bot = JDABuilder.createDefault(this.token)

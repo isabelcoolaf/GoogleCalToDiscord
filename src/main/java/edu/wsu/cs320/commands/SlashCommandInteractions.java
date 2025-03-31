@@ -7,6 +7,7 @@ import com.google.api.services.calendar.model.EventDateTime;
 import de.jcm.discordgamesdk.activity.Activity;
 import de.jcm.discordgamesdk.activity.ActivityType;
 import edu.wsu.cs320.GoogleCalToDiscord;
+import edu.wsu.cs320.RP.DiscordInterface;
 import edu.wsu.cs320.RP.Presence;
 import edu.wsu.cs320.config.ConfigManager;
 import edu.wsu.cs320.config.ConfigValues;
@@ -36,13 +37,15 @@ import java.util.stream.Collectors;
 
 public class SlashCommandInteractions extends ListenerAdapter {
     private final Presence richPresence;
+    private final DiscordInterface interfac;
     private String curCalendar;
     private GoogleCalendarServiceHandler calHandler;
     private int pageNumber;
 
     // Presence required so that commands can alter the data of the activity
-    public SlashCommandInteractions(Presence RP) {
+    public SlashCommandInteractions(Presence RP, DiscordInterface face) {
         richPresence = RP;
+        interfac = face;
     }
     public void setGoogleCalendarHandler(GoogleCalendarServiceHandler handler){
         calHandler = handler;
@@ -245,6 +248,11 @@ public class SlashCommandInteractions extends ListenerAdapter {
 
                 event.reply("Now sleeping for **" + response + "** days.").setEphemeral(true).queue();
                 break;
+            case "reset":
+                event.reply("Reset calendar settings").setEphemeral(true).queue();
+                interfac.killBot();
+                richPresence.stopRunning();
+                interfac.run();
         }
     }
 
@@ -305,7 +313,7 @@ public class SlashCommandInteractions extends ListenerAdapter {
         OptionData sleepTime = new OptionData(OptionType.INTEGER, "days", "Choose number of days to sleep", true);
 
 
-        String[] commandList = {"event-info", "presence-type", "next-event", "start-next-event", "select-calendar", "sleep"};
+        String[] commandList = {"event-info", "presence-type", "next-event", "start-next-event", "select-calendar", "sleep", "reset"};
         String[] commandDescriptions = {
                 "Debugging command",
                 "Changes Presence Type",
@@ -313,8 +321,9 @@ public class SlashCommandInteractions extends ListenerAdapter {
                 "Immediately displays the next calendar event",
                 "Select a calendar to display",
                 "Stops updating events for selected amount of time",
+                "Resets calendar status settings"
         };
-        OptionData[] options = {null, PresenceType, null, null, null, sleepTime};
+        OptionData[] options = {null, PresenceType, null, null, null, sleepTime, null};
         for (int i = 0; i < commandList.length; i++) {
             if (options[i] != null){
                 commands.add(Commands.slash(commandList[i], commandDescriptions[i])
