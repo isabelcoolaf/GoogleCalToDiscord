@@ -22,7 +22,7 @@ import java.util.concurrent.ExecutionException;
  * @see CalendarList
  * @see CalendarListEntry
  */
-public class CalendarSelector implements ResponsiveGUI {
+public class CalendarSelector implements ResponsiveGUI<CalendarListEntry> {
     private JLabel selectCalendarLabel;
     private JPanel mainPanel;
     private JButton confirmButton;

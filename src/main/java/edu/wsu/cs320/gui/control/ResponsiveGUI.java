@@ -10,7 +10,7 @@ import javax.swing.*;
  * @see GuiController
  * @see GuiResponse
  */
-public interface ResponsiveGUI {
+public interface ResponsiveGUI<T> {
     /**
      * Returns the JPanel containing the GUI.
      */
@@ -21,7 +21,7 @@ public interface ResponsiveGUI {
      *
      * @see GuiResponse
      */
-    GuiResponse getResponse();
+    GuiResponse<T> getResponse();
 
     /**
      * Called by a GuiController whenever the user attempts to close the window.

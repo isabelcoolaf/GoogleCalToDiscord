@@ -20,7 +20,7 @@ import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
-public class Customizer implements ResponsiveGUI {
+public class Customizer implements ResponsiveGUI<File> {
     public JPanel mainPanel;
     private JPanel imagePreview;
     private JPanel previewContainer;
