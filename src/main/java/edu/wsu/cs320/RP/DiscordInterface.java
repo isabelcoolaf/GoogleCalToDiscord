@@ -18,11 +18,6 @@ public class DiscordInterface extends Thread{
         this.token = token;
     }
 
-    public void setCurCalendar(String googleCalID){
-        if (commands != null){
-            commands.setCurrentCalendar(googleCalID);
-        }
-    }
     public void killBot(){
         bot.shutdown();
     }
