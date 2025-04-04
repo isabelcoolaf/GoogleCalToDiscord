@@ -7,11 +7,8 @@ import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.entities.User;
 
-import java.io.IOException;
-
 public class DiscordInterface extends Thread{
     private final String id, token;
-    private SlashCommandInteractions commands;
     private JDA bot;
     public DiscordInterface(String id, String token){
         this.id = id;
@@ -31,19 +28,15 @@ public class DiscordInterface extends Thread{
 
         GoogleCalendarServiceHandler calHandler = new GoogleCalendarServiceHandler(GoogleCalToDiscord.googleOAuthManager.getCredentials());
 
-        Presence presence = new Presence(this.id);
-        commands = new SlashCommandInteractions(presence, this);
+        RichPresence presence = new RichPresence();
+        SlashCommandInteractions commands = new SlashCommandInteractions(presence, this);
         commands.setGoogleCalendarHandler(calHandler);
 
         this.bot = JDABuilder.createDefault(this.token)
                 .addEventListeners(commands)
                 .build();
 
-        try {
-            presence.Activity();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        presence.startDiscordActivity(this.id);
     }
 
     public void sendMessageToUser(long userID, String message) {

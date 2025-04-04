@@ -8,7 +8,7 @@ import de.jcm.discordgamesdk.activity.Activity;
 import de.jcm.discordgamesdk.activity.ActivityType;
 import edu.wsu.cs320.GoogleCalToDiscord;
 import edu.wsu.cs320.RP.DiscordInterface;
-import edu.wsu.cs320.RP.Presence;
+import edu.wsu.cs320.RP.RichPresence;
 import edu.wsu.cs320.config.ConfigManager;
 import edu.wsu.cs320.config.ConfigValues;
 import edu.wsu.cs320.googleapi.GoogleCalendarServiceHandler;
@@ -32,7 +32,7 @@ import java.util.stream.Collectors;
 
 public class CommandList {
     private int pageNumber;
-    private GoogleCalendarServiceHandler calHandler;
+    private final GoogleCalendarServiceHandler calHandler;
 
     public CommandList(GoogleCalendarServiceHandler handler){
         calHandler = handler;
@@ -59,11 +59,11 @@ public class CommandList {
             }
         }
     }
-    public void presenceTypeCommand(Presence richPresence, SlashCommandInteractionEvent event){
+    public void presenceTypeCommand(RichPresence richPresence, SlashCommandInteractionEvent event){
         OptionMapping presenceOptions = event.getOption("presence_type");
         String presenceResponse = presenceOptions.getAsString();
 
-        Activity activity = richPresence.getActivityState();
+        Activity activity = richPresence.getDiscordActivityState();
 
         Map<String, ActivityType> activityTypes = new HashMap<>();
         activityTypes.put("Playing", ActivityType.PLAYING);
@@ -75,7 +75,7 @@ public class CommandList {
         System.out.println(type);
         activity.setType(type);
 
-        richPresence.setActivityState(activity);
+        richPresence.setDiscordActivityState(activity);
 
         event.reply("Changed presence type to: " + presenceResponse).setEphemeral(true).queue();
     }
@@ -102,7 +102,7 @@ public class CommandList {
         }
     }
 
-    public void startNextEventCommand( Presence richPresence, SlashCommandInteractionEvent event){
+    public void startNextEventCommand(RichPresence richPresence, SlashCommandInteractionEvent event){
         ConfigManager config2 = new ConfigManager(ConfigValues.CONFIG_FILENAME);
         String curCalendar = config2.get(ConfigValues.GOOGLE_CALENDAR_ID);
         if (calHandler == null){
@@ -131,7 +131,7 @@ public class CommandList {
 
             String format = dateTime[1];
             String endTime = dateTime[3];
-            richPresence.pauseEventUpdates(format, endTime);
+            richPresence.pauseEventUpdatesFromCalendar(format, endTime);
 
             Instant nowUtc = Instant.now();
 
@@ -143,7 +143,7 @@ public class CommandList {
 
             Event eventF = events.get(0);
             eventF.setStart(eventDateTime);
-            richPresence.calendarEventUpdater(eventF);
+            richPresence.updateActivityWithCalendarEvent(eventF);
 
         }
     }
@@ -157,7 +157,7 @@ public class CommandList {
         }
     }
 
-    public void sleepCommand(Presence richPresence, SlashCommandInteractionEvent event){
+    public void sleepCommand(RichPresence richPresence, SlashCommandInteractionEvent event){
         OptionMapping sleepDays = event.getOption("days");
         long response = sleepDays.getAsLong();
 
@@ -167,20 +167,20 @@ public class CommandList {
         }
 
         LocalDate sleepDate = LocalDate.now().plusDays(response);
-        richPresence.pauseEventUpdates("date", sleepDate.toString());
-        richPresence.calendarEventUpdater(null);
+        richPresence.pauseEventUpdatesFromCalendar("date", sleepDate.toString());
+        richPresence.updateActivityWithCalendarEvent(null);
 
         event.reply("Now sleeping for **" + response + "** days.").setEphemeral(true).queue();
     }
 
-    public void resetCommand(Presence richPresence, DiscordInterface discordInterface, SlashCommandInteractionEvent event){
+    public void resetCommand(RichPresence richPresence, DiscordInterface discordInterface, SlashCommandInteractionEvent event){
         event.reply("Reset calendar settings").setEphemeral(true).queue();
         discordInterface.killBot();
-        richPresence.stopRunning();
+        richPresence.stopDiscordActivity();
         discordInterface.run();
     }
 
-    public void calendarPickerStringSelection(Presence richPresence, StringSelectInteractionEvent event){
+    public void calendarPickerStringSelection(RichPresence richPresence, StringSelectInteractionEvent event){
         if (event.getComponentId().equals("choose-calendar")) {
             String selection = event.getValues().get(0);
             if (selection.equals("Next Page")){
@@ -211,7 +211,7 @@ public class CommandList {
                     throw new RuntimeException(e);
                 }
 
-                richPresence.setPoll();
+                richPresence.setGoogleCalendar();
 
                 event.editMessage("**" + selection + "** is your selected calendar.").queue();
                 event.editSelectMenu(null).queue();

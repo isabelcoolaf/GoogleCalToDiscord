@@ -1,7 +1,7 @@
 package edu.wsu.cs320.commands;
 
 import edu.wsu.cs320.RP.DiscordInterface;
-import edu.wsu.cs320.RP.Presence;
+import edu.wsu.cs320.RP.RichPresence;
 import edu.wsu.cs320.googleapi.GoogleCalendarServiceHandler;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.StringSelectInteractionEvent;
@@ -17,12 +17,12 @@ import org.jetbrains.annotations.NotNull;
 import java.util.*;
 
 public class SlashCommandInteractions extends ListenerAdapter {
-    private final Presence richPresence;
+    private final RichPresence richPresence;
     private final DiscordInterface discordInterface;
     private GoogleCalendarServiceHandler calHandler;
 
     // Presence required so that commands can alter the data of the activity
-    public SlashCommandInteractions(Presence RP, DiscordInterface discInterface) {
+    public SlashCommandInteractions(RichPresence RP, DiscordInterface discInterface) {
         richPresence = RP;
         discordInterface = discInterface;
     }

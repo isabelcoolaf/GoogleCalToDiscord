@@ -1,7 +1,6 @@
 package edu.wsu.cs320;
 
 import com.google.api.services.calendar.model.CalendarListEntry;
-import edu.wsu.cs320.RP.Presence;
 import edu.wsu.cs320.commands.CommandList;
 import edu.wsu.cs320.commands.SlashCommandInteractions;
 import edu.wsu.cs320.config.ConfigManager;
@@ -9,7 +8,6 @@ import edu.wsu.cs320.config.ConfigValues;
 
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
-import net.dv8tion.jda.api.interactions.commands.Command;
 import net.dv8tion.jda.api.interactions.components.selections.StringSelectMenu;
 import org.junit.jupiter.api.Test;
 
@@ -117,8 +115,7 @@ public class DiscordTests {
 
     private JDA makeTestBot(){
         ConfigManager config = new ConfigManager(ConfigValues.CONFIG_FILENAME);
-        Presence presence = new Presence(config.get(ConfigValues.DISCORD_CLIENT_ID));
-        SlashCommandInteractions commands = new SlashCommandInteractions(presence,null);
+        SlashCommandInteractions commands = new SlashCommandInteractions(null,null);
         return JDABuilder.createDefault(config.get(ConfigValues.DISCORD_BOT_TOKEN))
                 .addEventListeners(commands)
                 .build();
