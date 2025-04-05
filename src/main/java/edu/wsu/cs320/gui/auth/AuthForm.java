@@ -15,7 +15,7 @@ import java.util.concurrent.ExecutionException;
 /**
  * The AuthWindow is a window that allows the user to type in authentication data necessary for running the program.
  */
-public class AuthForm implements ResponsiveGUI {
+public class AuthForm implements ResponsiveGUI<String[]> {
     public JPanel mainPanel;
     private JButton saveButton;
     private JPanel centerPanel;
