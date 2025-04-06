@@ -8,7 +8,7 @@ import de.jcm.discordgamesdk.activity.Activity;
 import de.jcm.discordgamesdk.activity.ActivityType;
 import edu.wsu.cs320.GoogleCalToDiscord;
 import edu.wsu.cs320.RP.DiscordInterface;
-import edu.wsu.cs320.RP.RichPresence;
+import edu.wsu.cs320.RP.DiscordRichPresence;
 import edu.wsu.cs320.config.ConfigManager;
 import edu.wsu.cs320.config.ConfigValues;
 import edu.wsu.cs320.googleapi.GoogleCalendarServiceHandler;
@@ -38,6 +38,9 @@ public class CommandList {
         calHandler = handler;
     }
 
+    /**
+     * Debug command for displaying google calendar event info.
+     */
     public void eventInfoCommand(SlashCommandInteractionEvent event){
         ConfigManager config = new ConfigManager(ConfigValues.CONFIG_FILENAME);
         String curCalendar = config.get(ConfigValues.GOOGLE_CALENDAR_ID);
@@ -59,11 +62,15 @@ public class CommandList {
             }
         }
     }
-    public void presenceTypeCommand(RichPresence richPresence, SlashCommandInteractionEvent event){
+
+    /**
+     * Changes the type of the rich presence status the user gets shown. (mostly useless)
+     */
+    public void presenceTypeCommand(DiscordRichPresence discordRichPresence, SlashCommandInteractionEvent event){
         OptionMapping presenceOptions = event.getOption("presence_type");
         String presenceResponse = presenceOptions.getAsString();
 
-        Activity activity = richPresence.getDiscordActivityState();
+        Activity activity = discordRichPresence.getDiscordActivityState();
 
         Map<String, ActivityType> activityTypes = new HashMap<>();
         activityTypes.put("Playing", ActivityType.PLAYING);
@@ -75,11 +82,14 @@ public class CommandList {
         System.out.println(type);
         activity.setType(type);
 
-        richPresence.setDiscordActivityState(activity);
+        discordRichPresence.setDiscordActivityState(activity);
 
         event.reply("Changed presence type to: " + presenceResponse).setEphemeral(true).queue();
     }
 
+    /**
+     * Shows the next event on the google calendar to the user
+     */
     public void nextEventCommand( SlashCommandInteractionEvent event){
         ConfigManager config3 = new ConfigManager(ConfigValues.CONFIG_FILENAME);
         String curCalendar = config3.get(ConfigValues.GOOGLE_CALENDAR_ID);
@@ -102,7 +112,12 @@ public class CommandList {
         }
     }
 
-    public void startNextEventCommand(RichPresence richPresence, SlashCommandInteractionEvent event){
+    /**
+     * Starts the next event on the selected google calendar.
+     * The event start time is set to 'now' and the original end time is the same.
+     * Only works to show the very next event on the calendar as the rich presence status
+     */
+    public void startNextEventCommand(DiscordRichPresence discordRichPresence, SlashCommandInteractionEvent event){
         ConfigManager config2 = new ConfigManager(ConfigValues.CONFIG_FILENAME);
         String curCalendar = config2.get(ConfigValues.GOOGLE_CALENDAR_ID);
         if (calHandler == null){
@@ -131,7 +146,7 @@ public class CommandList {
 
             String format = dateTime[1];
             String endTime = dateTime[3];
-            richPresence.pauseEventUpdatesFromCalendar(format, endTime);
+            discordRichPresence.pauseEventUpdatesFromCalendar(format, endTime);
 
             Instant nowUtc = Instant.now();
 
@@ -143,11 +158,14 @@ public class CommandList {
 
             Event eventF = events.get(0);
             eventF.setStart(eventDateTime);
-            richPresence.updateActivityWithCalendarEvent(eventF);
+            discordRichPresence.updateActivityWithCalendarEvent(eventF);
 
         }
     }
 
+    /**
+     * Gives the user a calendar selection menu and replies with what calendar the user has selected.
+     */
     public void selectCalendarCommand( SlashCommandInteractionEvent event){
         if (calHandler == null) {
             event.reply("Google Calendar not authenticated! Please sign in first.").setEphemeral(true).queue();
@@ -157,7 +175,10 @@ public class CommandList {
         }
     }
 
-    public void sleepCommand(RichPresence richPresence, SlashCommandInteractionEvent event){
+    /**
+     * Gives the user a calendar selection menu and replies with what calendar the user has selected.
+     */
+    public void sleepCommand(DiscordRichPresence discordRichPresence, SlashCommandInteractionEvent event){
         OptionMapping sleepDays = event.getOption("days");
         long response = sleepDays.getAsLong();
 
@@ -167,20 +188,26 @@ public class CommandList {
         }
 
         LocalDate sleepDate = LocalDate.now().plusDays(response);
-        richPresence.pauseEventUpdatesFromCalendar("date", sleepDate.toString());
-        richPresence.updateActivityWithCalendarEvent(null);
+        discordRichPresence.pauseEventUpdatesFromCalendar("date", sleepDate.toString());
+        discordRichPresence.updateActivityWithCalendarEvent(null);
 
         event.reply("Now sleeping for **" + response + "** days.").setEphemeral(true).queue();
     }
 
-    public void resetCommand(RichPresence richPresence, DiscordInterface discordInterface, SlashCommandInteractionEvent event){
+    /**
+     * Resets all changes made to the rich presence status made by other commands.
+     */
+    public void resetCommand(DiscordRichPresence discordRichPresence, DiscordInterface discordInterface, SlashCommandInteractionEvent event){
         event.reply("Reset calendar settings").setEphemeral(true).queue();
         discordInterface.killBot();
-        richPresence.stopDiscordActivity();
+        discordRichPresence.stopDiscordActivity();
         discordInterface.run();
     }
 
-    public void calendarPickerStringSelection(RichPresence richPresence, StringSelectInteractionEvent event){
+    /**
+     * Calendar selection handler for selecting a calendar.
+     */
+    public void calendarPickerStringSelection(DiscordRichPresence discordRichPresence, StringSelectInteractionEvent event){
         if (event.getComponentId().equals("choose-calendar")) {
             String selection = event.getValues().get(0);
             if (selection.equals("Next Page")){
@@ -211,7 +238,7 @@ public class CommandList {
                     throw new RuntimeException(e);
                 }
 
-                richPresence.setGoogleCalendar();
+                discordRichPresence.setGoogleCalendar();
 
                 event.editMessage("**" + selection + "** is your selected calendar.").queue();
                 event.editSelectMenu(null).queue();

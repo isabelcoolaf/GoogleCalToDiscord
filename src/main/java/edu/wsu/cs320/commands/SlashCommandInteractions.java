@@ -1,7 +1,7 @@
 package edu.wsu.cs320.commands;
 
 import edu.wsu.cs320.RP.DiscordInterface;
-import edu.wsu.cs320.RP.RichPresence;
+import edu.wsu.cs320.RP.DiscordRichPresence;
 import edu.wsu.cs320.googleapi.GoogleCalendarServiceHandler;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.StringSelectInteractionEvent;
@@ -17,13 +17,13 @@ import org.jetbrains.annotations.NotNull;
 import java.util.*;
 
 public class SlashCommandInteractions extends ListenerAdapter {
-    private final RichPresence richPresence;
+    private final DiscordRichPresence discordRichPresence;
     private final DiscordInterface discordInterface;
     private GoogleCalendarServiceHandler calHandler;
 
     // Presence required so that commands can alter the data of the activity
-    public SlashCommandInteractions(RichPresence RP, DiscordInterface discInterface) {
-        richPresence = RP;
+    public SlashCommandInteractions(DiscordRichPresence RP, DiscordInterface discInterface) {
+        discordRichPresence = RP;
         discordInterface = discInterface;
     }
     public void setGoogleCalendarHandler(GoogleCalendarServiceHandler handler){
@@ -39,22 +39,22 @@ public class SlashCommandInteractions extends ListenerAdapter {
                cmdList.eventInfoCommand(event);
                 break;
             case "presence-type":
-                cmdList.presenceTypeCommand(richPresence, event);
+                cmdList.presenceTypeCommand(discordRichPresence, event);
                 break;
             case "next-event":
                 cmdList.nextEventCommand(event);
                 break;
             case "start-next-event":
-                cmdList.startNextEventCommand(richPresence, event);
+                cmdList.startNextEventCommand(discordRichPresence, event);
                 break;
             case "select-calendar":
                 cmdList.selectCalendarCommand(event);
                 break;
             case "sleep":
-                cmdList.sleepCommand(richPresence, event);
+                cmdList.sleepCommand(discordRichPresence, event);
                 break;
             case "reset":
-                cmdList.resetCommand(richPresence, discordInterface, event);
+                cmdList.resetCommand(discordRichPresence, discordInterface, event);
                 break;
         }
     }
@@ -62,7 +62,7 @@ public class SlashCommandInteractions extends ListenerAdapter {
     @Override
     public void onStringSelectInteraction(@NotNull StringSelectInteractionEvent event) {
         CommandList cmdList = new CommandList(calHandler);
-        cmdList.calendarPickerStringSelection(richPresence, event);
+        cmdList.calendarPickerStringSelection(discordRichPresence, event);
     }
 
     @Override

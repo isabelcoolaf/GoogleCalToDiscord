@@ -28,7 +28,7 @@ public class DiscordInterface extends Thread{
 
         GoogleCalendarServiceHandler calHandler = new GoogleCalendarServiceHandler(GoogleCalToDiscord.googleOAuthManager.getCredentials());
 
-        RichPresence presence = new RichPresence();
+        DiscordRichPresence presence = new DiscordRichPresence();
         SlashCommandInteractions commands = new SlashCommandInteractions(presence, this);
         commands.setGoogleCalendarHandler(calHandler);
 
