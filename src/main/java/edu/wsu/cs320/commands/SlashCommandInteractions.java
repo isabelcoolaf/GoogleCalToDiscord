@@ -1,7 +1,7 @@
 package edu.wsu.cs320.commands;
 
 import edu.wsu.cs320.RP.DiscordInterface;
-import edu.wsu.cs320.RP.RichPresence;
+import edu.wsu.cs320.RP.DiscordRichPresence;
 import edu.wsu.cs320.googleapi.GoogleCalendarServiceHandler;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.StringSelectInteractionEvent;
@@ -17,13 +17,13 @@ import org.jetbrains.annotations.NotNull;
 import java.util.*;
 
 public class SlashCommandInteractions extends ListenerAdapter {
-    private final RichPresence richPresence;
+    private final DiscordRichPresence discordRichPresence;
     private final DiscordInterface discordInterface;
     private GoogleCalendarServiceHandler calHandler;
 
     // Presence required so that commands can alter the data of the activity
-    public SlashCommandInteractions(RichPresence RP, DiscordInterface discInterface) {
-        richPresence = RP;
+    public SlashCommandInteractions(DiscordRichPresence RP, DiscordInterface discInterface) {
+        discordRichPresence = RP;
         discordInterface = discInterface;
     }
     public void setGoogleCalendarHandler(GoogleCalendarServiceHandler handler){
@@ -39,30 +39,32 @@ public class SlashCommandInteractions extends ListenerAdapter {
                cmdList.eventInfoCommand(event);
                 break;
             case "presence-type":
-                cmdList.presenceTypeCommand(richPresence, event);
+                cmdList.presenceTypeCommand(discordRichPresence, event);
                 break;
             case "next-event":
                 cmdList.nextEventCommand(event);
                 break;
             case "start-next-event":
-                cmdList.startNextEventCommand(richPresence, event);
+                cmdList.startNextEventCommand(discordRichPresence, event);
                 break;
             case "select-calendar":
                 cmdList.selectCalendarCommand(event);
                 break;
             case "sleep":
-                cmdList.sleepCommand(richPresence, event);
+                cmdList.sleepCommand(discordRichPresence, event);
                 break;
             case "reset":
-                cmdList.resetCommand(richPresence, discordInterface, event);
+                cmdList.resetCommand(discordRichPresence, discordInterface, event);
                 break;
+            case"select-images":
+                cmdList.setImageCommand(discordRichPresence, event);
         }
     }
 
     @Override
     public void onStringSelectInteraction(@NotNull StringSelectInteractionEvent event) {
         CommandList cmdList = new CommandList(calHandler);
-        cmdList.calendarPickerStringSelection(richPresence, event);
+        cmdList.calendarPickerStringSelection(discordRichPresence, event);
     }
 
     @Override
@@ -80,8 +82,11 @@ public class SlashCommandInteractions extends ListenerAdapter {
 
         OptionData sleepTime = new OptionData(OptionType.INTEGER, "days", "Choose number of days to sleep", true);
 
+        OptionData largeImageSelect = new OptionData(OptionType.STRING, "large-image", "Large Image Key", false);
+        OptionData smallImageSelect = new OptionData(OptionType.STRING, "small-image", "Large Image Key", false);
 
-        String[] commandList = {"event-info", "presence-type", "next-event", "start-next-event", "select-calendar", "sleep", "reset"};
+
+        String[] commandList = {"event-info", "presence-type", "next-event", "start-next-event", "select-calendar", "sleep", "reset", "select-images"};
         String[] commandDescriptions = {
                 "Debugging command",
                 "Changes Presence Type",
@@ -89,10 +94,11 @@ public class SlashCommandInteractions extends ListenerAdapter {
                 "Immediately displays the next calendar event",
                 "Select a calendar to display",
                 "Stops updating events for selected amount of time",
-                "Resets calendar status settings"
+                "Resets calendar status settings",
+                "Select images to display on your profile presence"
         };
-        OptionData[] options = {null, PresenceType, null, null, null, sleepTime, null};
-        for (int i = 0; i < commandList.length; i++) {
+        OptionData[] options = {null, PresenceType, null, null, null, sleepTime, null, largeImageSelect, smallImageSelect};
+        for (int i = 0; i < commandList.length - 1; i++) {
             if (options[i] != null){
                 commands.add(Commands.slash(commandList[i], commandDescriptions[i])
                         .setContexts(InteractionContextType.ALL)
@@ -105,6 +111,13 @@ public class SlashCommandInteractions extends ListenerAdapter {
                         .setIntegrationTypes(IntegrationType.USER_INSTALL));
             }
         }
+
+        // image select *requires* two options
+        commands.add(Commands.slash(commandList[commandList.length - 1], commandDescriptions[commandList.length - 1])
+                        .setContexts(InteractionContextType.ALL)
+                        .setIntegrationTypes(IntegrationType.USER_INSTALL)
+                        .addOptions(options[commandList.length - 1])
+                        .addOptions(options[commandList.length]));
 
 
         event.getJDA().updateCommands().addCommands(commands).queue();

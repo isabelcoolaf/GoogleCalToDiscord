@@ -20,7 +20,7 @@ import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
 
-public class RichPresence {
+public class DiscordRichPresence {
 
     private Activity richPrsenceActivity;
     private Core updateHandler;
@@ -30,6 +30,11 @@ public class RichPresence {
     private boolean runDiscordActivity = true;
     private CalendarPollingService calendarEventPoll;
 
+
+    /**
+     * Starts the rich presence activity that is displayed and updated in discord.
+     * Runs the update loop to update the calendar from input or commands.
+     */
     public void startDiscordActivity(String applicationID){
         try(CreateParams params = new CreateParams()){
             params.setClientID(new BigInteger(applicationID).longValue());
@@ -61,10 +66,18 @@ public class RichPresence {
             }
         }
     }
+
+    /**
+     * Stops the rich presence from displaying in discord and stops polls from calendar polling.
+     */
     public void stopDiscordActivity(){
         runDiscordActivity = false;
         calendarEventPoll.stop();
     }
+
+    /**
+     * Updates the discord rich presence activity to display a given calendar event.
+     */
     public void updateActivityWithCalendarEvent(Event event){
         if (event != null) {
             try (Activity activity = new Activity()){
@@ -88,6 +101,21 @@ public class RichPresence {
             }
         }
     }
+
+    /**
+     * Updates rich presence activity with images from asset library in developer portal given a set of image keys.
+     * *Due to API limitations, an error will not be thrown here even if there is no such image key to select
+     */
+    public void updateActivityWithImages(String largeImageKey, String smallImageKey){
+        Activity state = getDiscordActivityState();
+        if (largeImageKey != null) state.assets().setLargeImage(largeImageKey);
+        if (smallImageKey != null) state.assets().setSmallImage(smallImageKey);
+        setDiscordActivityState(state);
+    }
+
+    /**
+     * Updates the calendar from the configuration settings for the rich presence status.
+     */
     public void setGoogleCalendar(){
         if (calendarEventPoll != null) calendarEventPoll.stop();
         GoogleCalendarServiceHandler handler = new GoogleCalendarServiceHandler(GoogleCalToDiscord.googleOAuthManager.getCredentials());
@@ -95,7 +123,12 @@ public class RichPresence {
         pollingService.start();
         calendarEventPoll = pollingService;
     }
-    
+
+    /**
+     * Pauses the rich presence status from updating.
+     * - 'type' changes the format of provided end time as either an end date or an end dateTime
+     * - 'end' is the specified end time for when to resume updating the rich presence status
+     */
     public void pauseEventUpdatesFromCalendar(String type, String end){
         if (type.equals("date")){
             LocalDate date = LocalDate.parse(end);
@@ -115,15 +148,11 @@ public class RichPresence {
         if (eventEndTime > Instant.now().toEpochMilli()) updateEventsFromCalendar = false;
         if (!updateEventsFromCalendar) System.out.println(" - Paused Status Updating - ");
     }
-    
-    public Activity getDiscordActivityState(){
-        return richPrsenceActivity;
-    }
-    
-    public void setDiscordActivityState(Activity state){
-        updateActivity(state);
-    }
-    // Handle google calendar event reminders
+
+
+    /**
+     * Handles event reminders for the user sending them a direct message for when there is an upcoming event with notifications on.
+     */
     private void eventReminders(){
         List<Event> reminders = calendarEventPoll.getCurrentReminders();
         for (Event upcomingEvent : reminders) {
@@ -143,7 +172,11 @@ public class RichPresence {
         richPrsenceActivity = activity;
         updateHandler.activityManager().updateActivity(richPrsenceActivity);
     }
-    
+
+    /**
+     * Checks to see if there have been any changes to the event.
+     * If there have been then the rich presence status is updated.
+     */
     private void calendarEventChangeCheck(){
         // check time to re-enable calendar updating
         eventEndTime = checkTime(eventEndTime);
@@ -170,6 +203,14 @@ public class RichPresence {
             }
         }
         return end;
+    }
+
+    public Activity getDiscordActivityState(){
+        return richPrsenceActivity;
+    }
+
+    public void setDiscordActivityState(Activity state){
+        updateActivity(state);
     }
 
 }

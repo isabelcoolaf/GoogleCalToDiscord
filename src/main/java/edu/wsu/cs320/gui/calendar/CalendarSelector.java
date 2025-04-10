@@ -6,7 +6,6 @@ import com.google.api.services.calendar.model.CalendarList;
 import com.google.api.services.calendar.model.CalendarListEntry;
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
-import com.intellij.uiDesigner.core.Spacer;
 import edu.wsu.cs320.gui.control.GuiResponse;
 import edu.wsu.cs320.gui.control.ResponsiveGUI;
 
