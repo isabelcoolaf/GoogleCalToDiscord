@@ -12,7 +12,6 @@ import edu.wsu.cs320.config.ConfigValues;
 import edu.wsu.cs320.googleapi.CalendarPollingService;
 import edu.wsu.cs320.googleapi.GoogleCalendarServiceHandler;
 import org.jsoup.Jsoup;
-import net.dv8tion.jda.api.entities.RichPresence;
 
 import java.math.BigInteger;
 import java.time.Instant;
@@ -103,6 +102,16 @@ public class DiscordRichPresence {
         }
     }
 
+    /**
+     * Updates rich presence activity with images from asset library in developer portal given a set of image keys.
+     * *Due to API limitations, an error will not be thrown here even if there is no such image key to select
+     */
+    public void updateActivityWithImages(String largeImageKey, String smallImageKey){
+        Activity state = getDiscordActivityState();
+        if (largeImageKey != null) state.assets().setLargeImage(largeImageKey);
+        if (smallImageKey != null) state.assets().setSmallImage(smallImageKey);
+        setDiscordActivityState(state);
+    }
 
     /**
      * Updates the calendar from the configuration settings for the rich presence status.

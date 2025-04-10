@@ -6,7 +6,6 @@ import com.google.api.services.calendar.model.CalendarList;
 import com.google.api.services.calendar.model.CalendarListEntry;
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
-import com.intellij.uiDesigner.core.Spacer;
 import edu.wsu.cs320.gui.control.GuiResponse;
 import edu.wsu.cs320.gui.control.ResponsiveGUI;
 
@@ -88,6 +87,7 @@ public class CalendarSelector implements ResponsiveGUI<CalendarListEntry> {
         } catch (CancellationException | InterruptedException | ExecutionException e) {
             return new GuiResponse<>(GuiResponse.ResponseCode.CANCELLED, null);
         }
+        System.out.println(result);
         return result;
     }
 

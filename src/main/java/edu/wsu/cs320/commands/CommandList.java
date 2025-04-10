@@ -205,6 +205,27 @@ public class CommandList {
     }
 
     /**
+     * Attempts to change images if possible given by the user as keys.
+     */
+    public void setImageCommand(DiscordRichPresence discordRichPresence, SlashCommandInteractionEvent event){
+        OptionMapping largeImageOpt = event.getOption("large-image");
+        OptionMapping smallImageOpt = event.getOption("small-image");
+        if (smallImageOpt == null && largeImageOpt == null){
+            event.reply("Please provide an image key.").setEphemeral(true).queue();
+            return;
+        }
+        String imageLarge;
+        String imageSmall;
+        if (largeImageOpt != null){imageLarge = largeImageOpt.getAsString();}
+        else {imageLarge = null;}
+        if (smallImageOpt != null){imageSmall = smallImageOpt.getAsString();}
+        else {imageSmall = null;}
+
+        discordRichPresence.updateActivityWithImages(imageLarge, imageSmall);
+        event.reply("Attempted to change images.\n*(If images are unchanged you may want to check your image keys)*").setEphemeral(true).queue();
+    }
+
+    /**
      * Calendar selection handler for selecting a calendar.
      */
     public void calendarPickerStringSelection(DiscordRichPresence discordRichPresence, StringSelectInteractionEvent event){

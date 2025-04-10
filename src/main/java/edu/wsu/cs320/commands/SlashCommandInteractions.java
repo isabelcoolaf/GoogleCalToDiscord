@@ -56,6 +56,8 @@ public class SlashCommandInteractions extends ListenerAdapter {
             case "reset":
                 cmdList.resetCommand(discordRichPresence, discordInterface, event);
                 break;
+            case"select-images":
+                cmdList.setImageCommand(discordRichPresence, event);
         }
     }
 
@@ -80,8 +82,11 @@ public class SlashCommandInteractions extends ListenerAdapter {
 
         OptionData sleepTime = new OptionData(OptionType.INTEGER, "days", "Choose number of days to sleep", true);
 
+        OptionData largeImageSelect = new OptionData(OptionType.STRING, "large-image", "Large Image Key", false);
+        OptionData smallImageSelect = new OptionData(OptionType.STRING, "small-image", "Large Image Key", false);
 
-        String[] commandList = {"event-info", "presence-type", "next-event", "start-next-event", "select-calendar", "sleep", "reset"};
+
+        String[] commandList = {"event-info", "presence-type", "next-event", "start-next-event", "select-calendar", "sleep", "reset", "select-images"};
         String[] commandDescriptions = {
                 "Debugging command",
                 "Changes Presence Type",
@@ -89,10 +94,11 @@ public class SlashCommandInteractions extends ListenerAdapter {
                 "Immediately displays the next calendar event",
                 "Select a calendar to display",
                 "Stops updating events for selected amount of time",
-                "Resets calendar status settings"
+                "Resets calendar status settings",
+                "Select images to display on your profile presence"
         };
-        OptionData[] options = {null, PresenceType, null, null, null, sleepTime, null};
-        for (int i = 0; i < commandList.length; i++) {
+        OptionData[] options = {null, PresenceType, null, null, null, sleepTime, null, largeImageSelect, smallImageSelect};
+        for (int i = 0; i < commandList.length - 1; i++) {
             if (options[i] != null){
                 commands.add(Commands.slash(commandList[i], commandDescriptions[i])
                         .setContexts(InteractionContextType.ALL)
@@ -105,6 +111,13 @@ public class SlashCommandInteractions extends ListenerAdapter {
                         .setIntegrationTypes(IntegrationType.USER_INSTALL));
             }
         }
+
+        // image select *requires* two options
+        commands.add(Commands.slash(commandList[commandList.length - 1], commandDescriptions[commandList.length - 1])
+                        .setContexts(InteractionContextType.ALL)
+                        .setIntegrationTypes(IntegrationType.USER_INSTALL)
+                        .addOptions(options[commandList.length - 1])
+                        .addOptions(options[commandList.length]));
 
 
         event.getJDA().updateCommands().addCommands(commands).queue();
