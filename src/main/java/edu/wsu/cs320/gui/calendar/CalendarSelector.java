@@ -87,7 +87,6 @@ public class CalendarSelector implements ResponsiveGUI<CalendarListEntry> {
         } catch (CancellationException | InterruptedException | ExecutionException e) {
             return new GuiResponse<>(GuiResponse.ResponseCode.CANCELLED, null);
         }
-        System.out.println(result);
         return result;
     }
 
