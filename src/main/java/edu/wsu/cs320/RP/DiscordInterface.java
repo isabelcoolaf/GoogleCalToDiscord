@@ -9,10 +9,15 @@ import net.dv8tion.jda.api.entities.User;
 
 public class DiscordInterface extends Thread{
     private final String id, token;
+    private DiscordRichPresence richPresence;
     private JDA bot;
     public DiscordInterface(String id, String token){
         this.id = id;
         this.token = token;
+    }
+
+    public DiscordRichPresence getRichPresence(){
+        return this.richPresence;
     }
 
     public void killBot(){
@@ -21,22 +26,17 @@ public class DiscordInterface extends Thread{
 
     @Override
     public void run(){
-        if (this.token == null || this.id == null) {
-            System.out.println("Bot Token or Application Id was not supplied: will not run interface!");
-            return;
-        }
-
         GoogleCalendarServiceHandler calHandler = new GoogleCalendarServiceHandler(GoogleCalToDiscord.googleOAuthManager.getCredentials());
 
-        DiscordRichPresence presence = new DiscordRichPresence();
-        SlashCommandInteractions commands = new SlashCommandInteractions(presence, this);
+        richPresence = new DiscordRichPresence();
+        SlashCommandInteractions commands = new SlashCommandInteractions(richPresence, this);
         commands.setGoogleCalendarHandler(calHandler);
 
         this.bot = JDABuilder.createDefault(this.token)
                 .addEventListeners(commands)
                 .build();
 
-        presence.startDiscordActivity(this.id);
+        richPresence.startDiscordActivity(this.id);
     }
 
     public void sendMessageToUser(long userID, String message) {
