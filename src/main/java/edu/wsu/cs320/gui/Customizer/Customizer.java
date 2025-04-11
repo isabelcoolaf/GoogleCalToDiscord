@@ -6,10 +6,14 @@ import com.intellij.uiDesigner.core.Spacer;
 import edu.wsu.cs320.gui.control.GuiResponse;
 import edu.wsu.cs320.gui.control.ResponsiveGUI;
 
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.plaf.FontUIResource;
 import javax.swing.text.StyleContext;
 import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
 import java.util.Locale;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -30,15 +34,43 @@ public class Customizer implements ResponsiveGUI<Customizer.CustomizerCode> {
     private JLabel progressRight;
     private JPanel mainTextPanel;
     private CompletableFuture<GuiResponse<CustomizerCode>> pendingResponse;
+    private BufferedImage image;
 
     public enum CustomizerCode {
         BACK, CHANGE_IMAGE
     }
 
-    public Customizer() {
+    public Customizer(JFrame frame) {
         $$$setupUI$$$();
         backButton.addActionListener(e -> completeResponse(CustomizerCode.BACK));
         changeImageButton.addActionListener(e -> {
+            JFileChooser fileSelector = new JFileChooser();
+            int returnVal = fileSelector.showOpenDialog(frame); // Where frame is the parent component
+            File file = null;
+            if (returnVal == JFileChooser.APPROVE_OPTION) {
+                file = fileSelector.getSelectedFile();
+            } else {
+                JOptionPane.showMessageDialog(frame, "Invalid file selected");
+            }
+            if (file == null) return;
+            if (!file.isFile() || !file.canRead()) {
+                JOptionPane.showMessageDialog(frame, "Please select a valid image.");
+                return;
+            }
+            try {
+                image = ImageIO.read(file);
+            } catch (IOException ex) {
+                JOptionPane.showMessageDialog(frame, "Could not read image: " + ex.getLocalizedMessage());
+                return;
+            }
+            imagePanel.removeAll();
+            Image scaled = image.getScaledInstance(60, 60, Image.SCALE_DEFAULT);
+            ImageIcon icon = new ImageIcon(scaled);
+            JLabel label = new JLabel(icon);
+            imagePanel.setLayout(new GridLayout(0, 1));
+            imagePanel.add(label);
+            imagePanel.validate();
+            imagePanel.repaint();
             completeResponse(CustomizerCode.CHANGE_IMAGE);
         });
     }
@@ -46,6 +78,10 @@ public class Customizer implements ResponsiveGUI<Customizer.CustomizerCode> {
     private void completeResponse(CustomizerCode code) {
         if (pendingResponse == null) return;
         pendingResponse.complete(new GuiResponse<CustomizerCode>(GuiResponse.ResponseCode.OK, code));
+    }
+
+    public BufferedImage getImage() {
+        return image;
     }
 
     @Override
