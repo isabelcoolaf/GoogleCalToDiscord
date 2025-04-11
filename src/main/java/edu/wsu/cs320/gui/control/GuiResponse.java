@@ -33,5 +33,8 @@ public class GuiResponse<T> {
         this.data = data;
     }
 
-
+    @Override
+    public String toString() {
+        return "GuiResponse(status: " + status + ", data:" + data + ")";
+    }
 }
