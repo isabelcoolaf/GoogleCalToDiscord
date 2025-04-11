@@ -72,13 +72,26 @@ public class GuiController {
     }
 
 
-    public GuiResponse<Customizer.CustomizerCode> openCustomizer() {
-        Customizer customizer = new Customizer();
-        openGUI(customizer);
-        window.setResizable(false);
-        window.setSize(268, 150);
+    /**
+     * Gets a response from the customizer GUI, making a new one if necessary. <br>
+     * NOTE: The customizer will stay open until it's told to go back to the calendar selector.<br>
+     * Opening a new GUI before getting data response code <code,white-space:"nowrap">Customizer.CustomizerCode.BACK</code,white-space:"nowrap">
+     * will likely cause unwanted side effects.
+     *
+     * @return The response received from the customizer GUI.
+     */
+    public GuiResponse<Customizer.CustomizerCode> accessCustomizer() {
+        // If customizer not already open, open it
+        if (customizer == null) {
+            customizer = new Customizer();
+            openGUI(customizer, 268, 150);
+            window.setResizable(false);
+        }
         GuiResponse<Customizer.CustomizerCode> resp = customizer.getResponse();
-        if (resp.data == Customizer.CustomizerCode.BACK) closeGUI();
+        if (resp.data == Customizer.CustomizerCode.BACK) {
+            closeGUI();
+            customizer = null;
+        }
         return resp;
     }
 
@@ -88,6 +101,15 @@ public class GuiController {
         guiPanel = gui.getGuiPanel();
         window.setContentPane(guiPanel);
         window.setSize(300, 200);
+        window.setLocationRelativeTo(null);
+        window.setVisible(true);
+    }
+
+    private void openGUI(ResponsiveGUI newGui, int width, int height) {
+        gui = newGui;
+        guiPanel = gui.getGuiPanel();
+        window.setContentPane(guiPanel);
+        window.setSize(width, height);
         window.setLocationRelativeTo(null);
         window.setVisible(true);
     }
