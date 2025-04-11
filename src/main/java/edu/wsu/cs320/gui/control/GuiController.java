@@ -8,6 +8,8 @@ import edu.wsu.cs320.gui.Customizer.Customizer;
 import edu.wsu.cs320.gui.auth.AuthForm;
 import edu.wsu.cs320.gui.calendar.CalendarSelector;
 
+import java.awt.image.BufferedImage;
+
 /**
  * Controls the creation, destruction, and display of ResponsiveGUIs used to gather input from the user.
  *
@@ -83,7 +85,7 @@ public class GuiController {
     public GuiResponse<Customizer.CustomizerCode> accessCustomizer() {
         // If customizer not already open, open it
         if (customizer == null) {
-            customizer = new Customizer();
+            customizer = new Customizer(window);
             openGUI(customizer, 340, 170);
             window.setResizable(false);
         }
@@ -93,6 +95,11 @@ public class GuiController {
             customizer = null;
         }
         return resp;
+    }
+
+    public BufferedImage getCustomizerImage() {
+        if (customizer == null) return null;
+        return customizer.getImage();
     }
 
 
