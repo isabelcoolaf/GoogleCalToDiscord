@@ -50,19 +50,27 @@ public class CalendarSelector implements ResponsiveGUI<CalendarListEntry> {
      * @see CalendarSelectorButton
      */
     public void feedCalendarList(CalendarList calList) {
-        System.out.println("Adding list..");
-        for (CalendarListEntry item : calList.getItems()) System.out.println(item.toString());
         entryPanel.removeAll();
         buttons.clear();
+        entryButtonGroup.clearSelection();
         entryPanel.setLayout(new GridLayout(0, 1));
         for (CalendarListEntry entry : calList.getItems()) addButton(entry);
-        entryButtonGroup.clearSelection();
+        entryPanel.validate();
+        mainPanel.repaint();
     }
 
     private void completeResponse() {
         if (pendingResponse == null) return; // No response to complete
-        CalendarSelectorButton selected = (CalendarSelectorButton) entryButtonGroup.getSelection();
-        if (selected == null) return; // Can't complete response if nothing selected
+        CalendarSelectorButton selected = null;
+        for (CalendarSelectorButton button : buttons) {
+            System.out.println("Button: " + button + " Selected = " + button.isSelected());
+            if (button.isSelected()) selected = button;
+        }
+        System.out.println("Search found button " + selected);
+        if (selected == null) { // Can't complete response if nothing selected
+            pendingResponse.complete(new GuiResponse<>(GuiResponse.ResponseCode.INCOMPLETE_DATA, null));
+            return;
+        }
         pendingResponse.complete(new GuiResponse<>(GuiResponse.ResponseCode.OK, selected.calendar));
     }
 
