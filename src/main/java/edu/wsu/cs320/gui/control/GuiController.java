@@ -4,6 +4,7 @@ import javax.swing.*;
 
 import com.google.api.services.calendar.model.CalendarList;
 import com.google.api.services.calendar.model.CalendarListEntry;
+import edu.wsu.cs320.gui.Customizer.Customizer;
 import edu.wsu.cs320.gui.auth.AuthForm;
 import edu.wsu.cs320.gui.calendar.CalendarSelector;
 
@@ -18,6 +19,7 @@ public class GuiController {
     private final JFrame window;
     private ResponsiveGUI gui;
     private JPanel guiPanel;
+    private Customizer customizer; // Customizer is persistent to allow consecutive image swaps
 
     /** Create a new controller with its window hidden. */
     public GuiController() {
@@ -41,6 +43,7 @@ public class GuiController {
      * @see AuthForm
      */
     public GuiResponse<String[]> getAuthData() {
+        window.setResizable(false);
         AuthForm auth = new AuthForm();
         openGUI(auth);
         GuiResponse<String[]> resp = new GuiResponse<>(GuiResponse.ResponseCode.WINDOW_CLOSED, null);
@@ -65,6 +68,17 @@ public class GuiController {
         selector.feedCalendarList(cals);
         GuiResponse<CalendarListEntry> resp = selector.getResponse();
         closeGUI();
+        return resp;
+    }
+
+
+    public GuiResponse<Customizer.CustomizerCode> openCustomizer() {
+        Customizer customizer = new Customizer();
+        openGUI(customizer);
+        window.setResizable(false);
+        window.setSize(268, 150);
+        GuiResponse<Customizer.CustomizerCode> resp = customizer.getResponse();
+        if (resp.data == Customizer.CustomizerCode.BACK) closeGUI();
         return resp;
     }
 
