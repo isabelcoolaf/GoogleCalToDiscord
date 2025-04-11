@@ -84,7 +84,7 @@ public class GuiController {
         // If customizer not already open, open it
         if (customizer == null) {
             customizer = new Customizer();
-            openGUI(customizer, 268, 150);
+            openGUI(customizer, 340, 170);
             window.setResizable(false);
         }
         GuiResponse<Customizer.CustomizerCode> resp = customizer.getResponse();

@@ -3,11 +3,11 @@
   <grid id="27dc6" binding="mainPanel" layout-manager="GridLayoutManager" row-count="2" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
     <margin top="0" left="0" bottom="0" right="0"/>
     <constraints>
-      <xy x="20" y="20" width="282" height="206"/>
+      <xy x="20" y="20" width="350" height="206"/>
     </constraints>
     <properties>
-      <minimumSize width="268" height="120"/>
-      <preferredSize width="268" height="120"/>
+      <minimumSize width="340" height="120"/>
+      <preferredSize width="340" height="120"/>
     </properties>
     <border type="none"/>
     <children>
@@ -37,13 +37,13 @@
           </component>
         </children>
       </grid>
-      <grid id="4e059" binding="previewPanel" layout-manager="GridLayoutManager" row-count="1" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="0" vgap="0">
+      <grid id="4e059" binding="previewPanel" layout-manager="GridLayoutManager" row-count="2" column-count="3" same-size-horizontally="false" same-size-vertically="false" hgap="3" vgap="0">
         <margin top="0" left="0" bottom="0" right="0"/>
         <constraints>
           <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="9" fill="0" indent="0" use-parent-layout="false">
-            <minimum-size width="268" height="100"/>
-            <preferred-size width="268" height="100"/>
-            <maximum-size width="268" height="100"/>
+            <minimum-size width="340" height="100"/>
+            <preferred-size width="340" height="100"/>
+            <maximum-size width="340" height="100"/>
           </grid>
         </constraints>
         <properties>
@@ -51,7 +51,121 @@
           <foreground color="-13026751"/>
         </properties>
         <border type="none"/>
-        <children/>
+        <children>
+          <grid id="29bf1" binding="imagePanel" layout-manager="GridLayoutManager" row-count="1" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="0" vgap="0">
+            <margin top="0" left="0" bottom="0" right="0"/>
+            <constraints>
+              <grid row="1" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="0" fill="0" indent="0" use-parent-layout="false">
+                <minimum-size width="60" height="60"/>
+                <preferred-size width="60" height="60"/>
+                <maximum-size width="60" height="60"/>
+              </grid>
+            </constraints>
+            <properties/>
+            <border type="none"/>
+            <children/>
+          </grid>
+          <component id="ec332" class="javax.swing.JLabel" binding="usingLabel">
+            <constraints>
+              <grid row="0" column="1" row-span="1" col-span="2" vsize-policy="1" hsize-policy="1" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+            </constraints>
+            <properties>
+              <background color="-2104859"/>
+              <font/>
+              <foreground color="-2565675"/>
+              <text value="Using GC2D"/>
+            </properties>
+          </component>
+          <grid id="940d0" binding="mainTextPanel" layout-manager="GridLayoutManager" row-count="3" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+            <margin top="0" left="0" bottom="0" right="0"/>
+            <constraints>
+              <grid row="1" column="2" row-span="1" col-span="1" vsize-policy="1" hsize-policy="1" anchor="8" fill="2" indent="0" use-parent-layout="false"/>
+            </constraints>
+            <properties>
+              <background color="-13026751"/>
+              <foreground color="-13026751"/>
+            </properties>
+            <border type="none"/>
+            <children>
+              <component id="940a4" class="javax.swing.JLabel" binding="calendarName">
+                <constraints>
+                  <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                </constraints>
+                <properties>
+                  <background color="-13026751"/>
+                  <foreground color="-2039330"/>
+                  <text value="&lt;Calendar Name&gt;"/>
+                </properties>
+              </component>
+              <component id="9b186" class="javax.swing.JLabel" binding="descriptionLabel">
+                <constraints>
+                  <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                </constraints>
+                <properties>
+                  <background color="-13026751"/>
+                  <foreground color="-2039330"/>
+                  <text value="&lt;Calendar Description&gt;"/>
+                </properties>
+              </component>
+              <grid id="65d7" binding="progressPanel" layout-manager="GridLayoutManager" row-count="1" column-count="3" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+                <margin top="0" left="0" bottom="0" right="0"/>
+                <constraints>
+                  <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="2" indent="0" use-parent-layout="false"/>
+                </constraints>
+                <properties>
+                  <background color="-13026751"/>
+                  <foreground color="-13026751"/>
+                </properties>
+                <border type="none"/>
+                <children>
+                  <component id="206d1" class="javax.swing.JLabel" binding="progressLeft">
+                    <constraints>
+                      <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                    </constraints>
+                    <properties>
+                      <background color="-13026751"/>
+                      <foreground color="-2039330"/>
+                      <text value="00:00"/>
+                    </properties>
+                  </component>
+                  <component id="1e1f7" class="javax.swing.JLabel" binding="progressRight">
+                    <constraints>
+                      <grid row="0" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                    </constraints>
+                    <properties>
+                      <background color="-13026751"/>
+                      <foreground color="-2039330"/>
+                      <text value="XX:XX"/>
+                    </properties>
+                  </component>
+                  <component id="54e8e" class="javax.swing.JProgressBar" binding="progressBar1" default-binding="true">
+                    <constraints>
+                      <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                    </constraints>
+                    <properties>
+                      <background color="-13552840"/>
+                    </properties>
+                  </component>
+                </children>
+              </grid>
+            </children>
+          </grid>
+          <grid id="26d90" layout-manager="GridLayoutManager" row-count="1" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+            <margin top="0" left="0" bottom="0" right="0"/>
+            <constraints>
+              <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false">
+                <minimum-size width="0" height="0"/>
+                <preferred-size width="0" height="0"/>
+                <maximum-size width="0" height="0"/>
+              </grid>
+            </constraints>
+            <properties>
+              <foreground color="-13026751"/>
+            </properties>
+            <border type="none"/>
+            <children/>
+          </grid>
+        </children>
       </grid>
     </children>
   </grid>
