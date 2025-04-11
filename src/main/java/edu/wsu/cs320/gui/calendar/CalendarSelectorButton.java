@@ -19,4 +19,9 @@ public class CalendarSelectorButton extends JRadioButton {
         this.setText(cal.getSummary());
         this.setToolTipText(cal.getDescription());
     }
+
+    @Override
+    public String toString() {
+        return "CalendarSelectorButton (Calendar: " + calendar.getId() + ")";
+    }
 }

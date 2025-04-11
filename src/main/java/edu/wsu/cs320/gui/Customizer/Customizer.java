@@ -6,51 +6,82 @@ import com.intellij.uiDesigner.core.Spacer;
 import edu.wsu.cs320.gui.control.GuiResponse;
 import edu.wsu.cs320.gui.control.ResponsiveGUI;
 
-import javax.annotation.Nullable;
+import javax.imageio.ImageIO;
 import javax.swing.*;
-import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.plaf.FontUIResource;
 import javax.swing.text.StyleContext;
 import java.awt.*;
+import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.IOException;
 import java.util.Locale;
-import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
-public class Customizer implements ResponsiveGUI<File> {
-    public JPanel mainPanel;
-    private JPanel imagePreview;
-    private JPanel previewContainer;
-    private JProgressBar timeProgress;
-    private JLabel eventName;
-    private JLabel eventSummary;
-    private JLabel timeStart;
-    private JLabel timeEnd;
+public class Customizer implements ResponsiveGUI<Customizer.CustomizerCode> {
+    private JPanel mainPanel;
+    private JPanel previewPanel;
+    private JPanel buttonPanel;
+    private JButton backButton;
     private JButton changeImageButton;
+    private JPanel imagePanel;
     private JLabel usingLabel;
-    @Nullable
-    private CompletableFuture<GuiResponse<File>> pendingResponse;
+    private JLabel calendarName;
+    private JPanel progressPanel;
+    private JProgressBar progressBar1;
+    private JLabel descriptionLabel;
+    private JLabel progressLeft;
+    private JLabel progressRight;
+    private JPanel mainTextPanel;
+    private CompletableFuture<GuiResponse<CustomizerCode>> pendingResponse;
+    private BufferedImage image;
 
-    public Customizer() {
-        changeImageButton.addActionListener(event -> onClick());
+    public enum CustomizerCode {
+        BACK, CHANGE_IMAGE
     }
 
-    private void onClick() {
-        JFileChooser chooser = new JFileChooser();
-        FileNameExtensionFilter filter = new FileNameExtensionFilter("JPG & GIF Images", "jpg", "png", "jpeg");
-        chooser.setFileFilter(filter);
-        int returnVal = chooser.showOpenDialog(mainPanel);
-        if (returnVal == JFileChooser.APPROVE_OPTION) {
-            System.out.println("You chose to open this file: " + chooser.getSelectedFile().getName());
-        }
-        if (pendingResponse != null)
-            pendingResponse.complete(new GuiResponse<File>(GuiResponse.ResponseCode.OK, chooser.getSelectedFile()));
+    public Customizer(JFrame frame) {
+        $$$setupUI$$$();
+        backButton.addActionListener(e -> completeResponse(CustomizerCode.BACK));
+        changeImageButton.addActionListener(e -> {
+            JFileChooser fileSelector = new JFileChooser();
+            int returnVal = fileSelector.showOpenDialog(frame); // Where frame is the parent component
+            File file = null;
+            if (returnVal == JFileChooser.APPROVE_OPTION) {
+                file = fileSelector.getSelectedFile();
+            } else {
+                JOptionPane.showMessageDialog(frame, "Invalid file selected");
+            }
+            if (file == null) return;
+            if (!file.isFile() || !file.canRead()) {
+                JOptionPane.showMessageDialog(frame, "Please select a valid image.");
+                return;
+            }
+            try {
+                image = ImageIO.read(file);
+            } catch (IOException ex) {
+                JOptionPane.showMessageDialog(frame, "Could not read image: " + ex.getLocalizedMessage());
+                return;
+            }
+            imagePanel.removeAll();
+            Image scaled = image.getScaledInstance(60, 60, Image.SCALE_DEFAULT);
+            ImageIcon icon = new ImageIcon(scaled);
+            JLabel label = new JLabel(icon);
+            imagePanel.setLayout(new GridLayout(0, 1));
+            imagePanel.add(label);
+            imagePanel.validate();
+            imagePanel.repaint();
+            completeResponse(CustomizerCode.CHANGE_IMAGE);
+        });
     }
 
-    @Nullable
-    public CompletableFuture<GuiResponse<File>> getPendingResponse() {
-        return pendingResponse;
+    private void completeResponse(CustomizerCode code) {
+        if (pendingResponse == null) return;
+        pendingResponse.complete(new GuiResponse<CustomizerCode>(GuiResponse.ResponseCode.OK, code));
+    }
+
+    public BufferedImage getImage() {
+        return image;
     }
 
     @Override
@@ -59,13 +90,13 @@ public class Customizer implements ResponsiveGUI<File> {
     }
 
     @Override
-    public GuiResponse<File> getResponse() {
-        pendingResponse = new CompletableFuture<GuiResponse<File>>();
-        GuiResponse<File> result;
+    public GuiResponse<CustomizerCode> getResponse() {
+        pendingResponse = new CompletableFuture<>();
+        GuiResponse<CustomizerCode> result = new GuiResponse<>(GuiResponse.ResponseCode.INCOMPLETE_DATA, null);
         try {
             result = pendingResponse.get();
-        } catch (CancellationException | InterruptedException | ExecutionException e) {
-            result = new GuiResponse<File>(GuiResponse.ResponseCode.CANCELLED, null);
+        } catch (InterruptedException | ExecutionException e) {
+            pendingResponse.complete(new GuiResponse<>(GuiResponse.ResponseCode.CANCELLED, null));
         }
         return result;
     }
@@ -73,11 +104,11 @@ public class Customizer implements ResponsiveGUI<File> {
     @Override
     public void onWindowClose() {
         if (pendingResponse == null) return;
-        pendingResponse.complete(new GuiResponse<File>(GuiResponse.ResponseCode.WINDOW_CLOSED, null));
+        pendingResponse.complete(new GuiResponse<CustomizerCode>(GuiResponse.ResponseCode.WINDOW_CLOSED, null));
     }
 
-    {
-        $$$setupUI$$$();
+    private void createUIComponents() {
+        // TODO: place custom component creation code here
     }
 
     /**
@@ -89,92 +120,73 @@ public class Customizer implements ResponsiveGUI<File> {
      */
     private void $$$setupUI$$$() {
         mainPanel = new JPanel();
-        mainPanel.setLayout(new GridLayoutManager(4, 3, new Insets(5, 5, 5, 5), -1, -1));
-        mainPanel.setForeground(new Color(-16777216));
-        final Spacer spacer1 = new Spacer();
-        mainPanel.add(spacer1, new GridConstraints(2, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
-        final Spacer spacer2 = new Spacer();
-        mainPanel.add(spacer2, new GridConstraints(2, 2, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
-        final Spacer spacer3 = new Spacer();
-        mainPanel.add(spacer3, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1, GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
-        final Spacer spacer4 = new Spacer();
-        mainPanel.add(spacer4, new GridConstraints(3, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1, GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
-        previewContainer = new JPanel();
-        previewContainer.setLayout(new GridLayoutManager(3, 2, new Insets(10, 10, 10, 10), 0, 0));
-        previewContainer.setBackground(new Color(-13552840));
-        previewContainer.setForeground(new Color(-13552840));
-        previewContainer.setOpaque(true);
-        mainPanel.add(previewContainer, new GridConstraints(2, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
-        imagePreview = new JPanel();
-        imagePreview.setLayout(new GridLayoutManager(1, 1, new Insets(0, 0, 0, 0), 5, -1));
-        imagePreview.setBackground(new Color(-16777216));
-        imagePreview.setForeground(new Color(-16777216));
-        previewContainer.add(imagePreview, new GridConstraints(2, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, new Dimension(64, 64), null, new Dimension(64, 64), 0, false));
-        final JPanel panel1 = new JPanel();
-        panel1.setLayout(new GridLayoutManager(3, 5, new Insets(0, 0, 0, 0), -1, -1));
-        panel1.setBackground(new Color(-13552840));
-        panel1.setForeground(new Color(-13552840));
-        panel1.setOpaque(true);
-        previewContainer.add(panel1, new GridConstraints(2, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
-        eventName = new JLabel();
-        Font eventNameFont = this.$$$getFont$$$("Gadugi", Font.BOLD, -1, eventName.getFont());
-        if (eventNameFont != null) eventName.setFont(eventNameFont);
-        eventName.setForeground(new Color(-988432));
-        eventName.setOpaque(false);
-        eventName.setText("<Event Name>");
-        panel1.add(eventName, new GridConstraints(0, 0, 1, 3, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-        eventSummary = new JLabel();
-        Font eventSummaryFont = this.$$$getFont$$$("Gadugi", Font.PLAIN, -1, eventSummary.getFont());
-        if (eventSummaryFont != null) eventSummary.setFont(eventSummaryFont);
-        eventSummary.setForeground(new Color(-988432));
-        eventSummary.setOpaque(false);
-        eventSummary.setText("<Event description>");
-        panel1.add(eventSummary, new GridConstraints(1, 0, 1, 3, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-        timeStart = new JLabel();
-        Font timeStartFont = this.$$$getFont$$$("Droid Sans Mono", Font.BOLD, -1, timeStart.getFont());
-        if (timeStartFont != null) timeStart.setFont(timeStartFont);
-        timeStart.setForeground(new Color(-988432));
-        timeStart.setOpaque(false);
-        timeStart.setText("12:34");
-        panel1.add(timeStart, new GridConstraints(2, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-        timeEnd = new JLabel();
-        timeEnd.setAutoscrolls(false);
-        timeEnd.setBackground(new Color(-13552840));
-        Font timeEndFont = this.$$$getFont$$$("Droid Sans Mono", Font.BOLD, -1, timeEnd.getFont());
-        if (timeEndFont != null) timeEnd.setFont(timeEndFont);
-        timeEnd.setForeground(new Color(-988432));
-        timeEnd.setOpaque(true);
-        timeEnd.setText("99:99");
-        panel1.add(timeEnd, new GridConstraints(2, 4, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-        timeProgress = new JProgressBar();
-        Font timeProgressFont = this.$$$getFont$$$("Gadugi", Font.BOLD, -1, timeProgress.getFont());
-        if (timeProgressFont != null) timeProgress.setFont(timeProgressFont);
-        timeProgress.setInheritsPopupMenu(true);
-        timeProgress.setMaximum(6039);
-        timeProgress.setValue(754);
-        panel1.add(timeProgress, new GridConstraints(2, 2, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-        final Spacer spacer5 = new Spacer();
-        panel1.add(spacer5, new GridConstraints(2, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, 1, new Dimension(5, -1), new Dimension(5, -1), new Dimension(5, -1), 0, false));
-        final Spacer spacer6 = new Spacer();
-        panel1.add(spacer6, new GridConstraints(2, 3, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, 1, new Dimension(5, -1), new Dimension(5, -1), new Dimension(5, -1), 0, false));
-        usingLabel = new JLabel();
-        Font usingLabelFont = this.$$$getFont$$$("Gadugi", Font.BOLD, -1, usingLabel.getFont());
-        if (usingLabelFont != null) usingLabel.setFont(usingLabelFont);
-        usingLabel.setForeground(new Color(-988432));
-        usingLabel.setHorizontalAlignment(2);
-        usingLabel.setHorizontalTextPosition(2);
-        usingLabel.setText("Using GC2D");
-        previewContainer.add(usingLabel, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-        final Spacer spacer7 = new Spacer();
-        previewContainer.add(spacer7, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1, GridConstraints.SIZEPOLICY_WANT_GROW, new Dimension(5, 5), new Dimension(5, 5), new Dimension(5, 5), 0, false));
+        mainPanel.setLayout(new GridLayoutManager(2, 1, new Insets(0, 0, 0, 0), -1, -1));
+        mainPanel.setMinimumSize(new Dimension(340, 120));
+        mainPanel.setPreferredSize(new Dimension(340, 120));
+        buttonPanel = new JPanel();
+        buttonPanel.setLayout(new GridLayoutManager(1, 2, new Insets(0, 0, 0, 0), -1, -1));
+        mainPanel.add(buttonPanel, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
+        backButton = new JButton();
+        backButton.setText("Back");
+        buttonPanel.add(backButton, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         changeImageButton = new JButton();
-        changeImageButton.setText("Change image");
-        mainPanel.add(changeImageButton, new GridConstraints(1, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        changeImageButton.setText("Change Image");
+        buttonPanel.add(changeImageButton, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        previewPanel = new JPanel();
+        previewPanel.setLayout(new GridLayoutManager(2, 3, new Insets(0, 0, 0, 0), 3, 0));
+        previewPanel.setBackground(new Color(-13026751));
+        previewPanel.setForeground(new Color(-13026751));
+        mainPanel.add(previewPanel, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_NORTHWEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, new Dimension(340, 100), new Dimension(340, 100), new Dimension(340, 100), 0, false));
+        imagePanel = new JPanel();
+        imagePanel.setLayout(new GridLayoutManager(1, 1, new Insets(0, 0, 0, 0), 0, 0));
+        previewPanel.add(imagePanel, new GridConstraints(1, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, new Dimension(60, 60), new Dimension(60, 60), new Dimension(60, 60), 0, false));
+        usingLabel = new JLabel();
+        usingLabel.setBackground(new Color(-2104859));
+        Font usingLabelFont = this.$$$getFont$$$(null, -1, -1, usingLabel.getFont());
+        if (usingLabelFont != null) usingLabel.setFont(usingLabelFont);
+        usingLabel.setForeground(new Color(-2565675));
+        usingLabel.setText("Using GC2D");
+        previewPanel.add(usingLabel, new GridConstraints(0, 1, 1, 2, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, 1, 1, null, null, null, 0, false));
+        mainTextPanel = new JPanel();
+        mainTextPanel.setLayout(new GridLayoutManager(3, 1, new Insets(0, 0, 0, 0), -1, -1));
+        mainTextPanel.setBackground(new Color(-13026751));
+        mainTextPanel.setForeground(new Color(-13026751));
+        previewPanel.add(mainTextPanel, new GridConstraints(1, 2, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_VERTICAL, 1, 1, null, null, null, 0, false));
+        calendarName = new JLabel();
+        calendarName.setBackground(new Color(-13026751));
+        calendarName.setForeground(new Color(-2039330));
+        calendarName.setText("<Calendar Name>");
+        mainTextPanel.add(calendarName, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        descriptionLabel = new JLabel();
+        descriptionLabel.setBackground(new Color(-13026751));
+        descriptionLabel.setForeground(new Color(-2039330));
+        descriptionLabel.setText("<Calendar Description>");
+        mainTextPanel.add(descriptionLabel, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        progressPanel = new JPanel();
+        progressPanel.setLayout(new GridLayoutManager(1, 3, new Insets(0, 0, 0, 0), -1, -1));
+        progressPanel.setBackground(new Color(-13026751));
+        progressPanel.setForeground(new Color(-13026751));
+        mainTextPanel.add(progressPanel, new GridConstraints(2, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_VERTICAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
+        progressLeft = new JLabel();
+        progressLeft.setBackground(new Color(-13026751));
+        progressLeft.setForeground(new Color(-2039330));
+        progressLeft.setText("00:00");
+        progressPanel.add(progressLeft, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        progressRight = new JLabel();
+        progressRight.setBackground(new Color(-13026751));
+        progressRight.setForeground(new Color(-2039330));
+        progressRight.setText("XX:XX");
+        progressPanel.add(progressRight, new GridConstraints(0, 2, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        progressBar1 = new JProgressBar();
+        progressBar1.setBackground(new Color(-13552840));
+        progressPanel.add(progressBar1, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        final JPanel panel1 = new JPanel();
+        panel1.setLayout(new GridLayoutManager(1, 1, new Insets(0, 0, 0, 0), -1, -1));
+        panel1.setForeground(new Color(-13026751));
+        previewPanel.add(panel1, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, new Dimension(0, 0), new Dimension(0, 0), new Dimension(0, 0), 0, false));
     }
 
-    /**
-     * @noinspection ALL
-     */
+    /** @noinspection ALL */
     private Font $$$getFont$$$(String fontName, int style, int size, Font currentFont) {
         if (currentFont == null) return null;
         String resultName;
@@ -194,11 +206,10 @@ public class Customizer implements ResponsiveGUI<File> {
         return fontWithFallback instanceof FontUIResource ? fontWithFallback : new FontUIResource(fontWithFallback);
     }
 
-    /**
-     * @noinspection ALL
-     */
+    /** @noinspection ALL */
     public JComponent $$$getRootComponent$$$() {
         return mainPanel;
     }
+
 
 }
