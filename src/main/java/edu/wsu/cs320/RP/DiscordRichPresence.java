@@ -83,13 +83,14 @@ public class DiscordRichPresence {
             try (Activity activity = new Activity()){
                 activity.setType(ActivityType.WATCHING);
                 activity.setDetails(event.getSummary());
-                activity.setState(Jsoup.parse(event.getDescription()).text());
                 DateTime start = event.getStart().getDateTime();
                 DateTime end = event.getEnd().getDateTime();
                 if (start != null && end != null){
                     activity.timestamps().setStart(Instant.ofEpochMilli(start.getValue()));
                     activity.timestamps().setEnd(Instant.ofEpochMilli(end.getValue()));
                 }
+                if (event.getDescription() != null)
+                    activity.setState(Jsoup.parse(event.getDescription()).text());
                 updateActivity(activity);
             }
         } else {
@@ -211,6 +212,10 @@ public class DiscordRichPresence {
 
     public void setDiscordActivityState(Activity state){
         updateActivity(state);
+    }
+
+    public CalendarPollingService getPollingService() {
+        return this.calendarEventPoll;
     }
 
 }
