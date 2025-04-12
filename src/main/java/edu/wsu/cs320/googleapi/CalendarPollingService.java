@@ -19,7 +19,7 @@ public class CalendarPollingService {
     private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
     private ScheduledFuture<?> taskObj;
     private final GoogleCalendarServiceHandler handler;
-    private final String calendarID;
+    private String calendarID;
 
     private Event currentEvent;
     private final List<Event> currentReminders = new ArrayList<>();
@@ -45,16 +45,6 @@ public class CalendarPollingService {
         if (taskObj != null) {
             taskObj.cancel(true);
         }
-    }
-
-    public Event getCurrentEvent() {
-        return currentEvent;
-    }
-
-    public List<Event> getCurrentReminders() {
-        List<Event> reminders = new ArrayList<>(currentReminders);
-        currentReminders.clear();
-        return reminders;
     }
 
     private void loop() {
@@ -125,5 +115,19 @@ public class CalendarPollingService {
         if (!setCurrent) {
             currentEvent = null;
         }
+    }
+
+    public Event getCurrentEvent() {
+        return currentEvent;
+    }
+
+    public List<Event> getCurrentReminders() {
+        List<Event> reminders = new ArrayList<>(currentReminders);
+        currentReminders.clear();
+        return reminders;
+    }
+
+    public void setCalendarID(String newCalendarID) {
+        this.calendarID = newCalendarID;
     }
 }

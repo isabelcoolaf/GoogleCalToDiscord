@@ -56,7 +56,7 @@ public class SlashCommandInteractions extends ListenerAdapter {
             case "reset":
                 cmdList.resetCommand(discordRichPresence, discordInterface, event);
                 break;
-            case"select-images":
+            case "select-images":
                 cmdList.setImageCommand(discordRichPresence, event);
         }
     }
@@ -82,8 +82,8 @@ public class SlashCommandInteractions extends ListenerAdapter {
 
         OptionData sleepTime = new OptionData(OptionType.INTEGER, "days", "Choose number of days to sleep", true);
 
-        OptionData largeImageSelect = new OptionData(OptionType.STRING, "large-image", "Large Image Key", false);
-        OptionData smallImageSelect = new OptionData(OptionType.STRING, "small-image", "Large Image Key", false);
+        OptionData largeImageSelect = new OptionData(OptionType.STRING, "large-image", "Large Image URL", false);
+        OptionData smallImageSelect = new OptionData(OptionType.STRING, "small-image", "Large Image URL", false);
 
 
         String[] commandList = {"event-info", "presence-type", "next-event", "start-next-event", "select-calendar", "sleep", "reset", "select-images"};

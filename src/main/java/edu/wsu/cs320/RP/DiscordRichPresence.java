@@ -83,13 +83,14 @@ public class DiscordRichPresence {
             try (Activity activity = new Activity()){
                 activity.setType(ActivityType.WATCHING);
                 activity.setDetails(event.getSummary());
-                activity.setState(Jsoup.parse(event.getDescription()).text());
                 DateTime start = event.getStart().getDateTime();
                 DateTime end = event.getEnd().getDateTime();
                 if (start != null && end != null){
                     activity.timestamps().setStart(Instant.ofEpochMilli(start.getValue()));
                     activity.timestamps().setEnd(Instant.ofEpochMilli(end.getValue()));
                 }
+                if (event.getDescription() != null)
+                    activity.setState(Jsoup.parse(event.getDescription()).text());
                 updateActivity(activity);
             }
         } else {
@@ -106,10 +107,10 @@ public class DiscordRichPresence {
      * Updates rich presence activity with images from asset library in developer portal given a set of image keys.
      * *Due to API limitations, an error will not be thrown here even if there is no such image key to select
      */
-    public void updateActivityWithImages(String largeImageKey, String smallImageKey){
+    public void updateActivityWithImages(String largeImageURL, String smallImageURL){
         Activity state = getDiscordActivityState();
-        if (largeImageKey != null) state.assets().setLargeImage(largeImageKey);
-        if (smallImageKey != null) state.assets().setSmallImage(smallImageKey);
+        if (largeImageURL != null) state.assets().setLargeImage(largeImageURL);
+        if (smallImageURL != null) state.assets().setSmallImage(smallImageURL);
         setDiscordActivityState(state);
     }
 
@@ -211,6 +212,10 @@ public class DiscordRichPresence {
 
     public void setDiscordActivityState(Activity state){
         updateActivity(state);
+    }
+
+    public CalendarPollingService getPollingService() {
+        return this.calendarEventPoll;
     }
 
 }
