@@ -77,7 +77,6 @@ public class GoogleCalToDiscord {
         System.out.println("Getting calendar...");
         GoogleCalendarServiceHandler calendarServiceHandler = new GoogleCalendarServiceHandler(googleOAuthManager.getCredentials());
         CalendarList calendarList = new CalendarList();
-        CalendarListEntry selectedCalendar = new CalendarListEntry(); // Dummy entry because compiler complains
         calendarList.setItems(calendarServiceHandler.getCalendarList());
         GuiResponse<CalendarListEntry> selectorResponse;
         GuiResponse<Customizer.CustomizerCode> customizerResponse;
@@ -90,7 +89,8 @@ public class GoogleCalToDiscord {
                         System.out.println("User did not select a calendar. Retrying...");
                         continue;
                     case OK:
-                        selectedCalendar = selectorResponse.data;
+                        discordInterface.getRichPresence().getPollingService().setCalendarID(selectorResponse.data.getId());
+                        config.put(ConfigValues.DISCORD_CLIENT_ID, selectorResponse.data.getId());
                         break;
                     case WINDOW_CLOSED:
                         shouldExitUILoop = true;
@@ -104,7 +104,6 @@ public class GoogleCalToDiscord {
                 break;
             }
             if (shouldExitUILoop) break;
-            // TODO: update discord interface with new calendar
             while (true) {
                 customizerResponse = controller.accessCustomizer();
                 switch (customizerResponse.status) {
@@ -126,6 +125,5 @@ public class GoogleCalToDiscord {
             }
             if (shouldExitUILoop) break;
         }
-        discordInterface.killBot();
     }
 }
