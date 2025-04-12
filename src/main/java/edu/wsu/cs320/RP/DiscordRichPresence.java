@@ -107,10 +107,10 @@ public class DiscordRichPresence {
      * Updates rich presence activity with images from asset library in developer portal given a set of image keys.
      * *Due to API limitations, an error will not be thrown here even if there is no such image key to select
      */
-    public void updateActivityWithImages(String largeImageKey, String smallImageKey){
+    public void updateActivityWithImages(String largeImageURL, String smallImageURL){
         Activity state = getDiscordActivityState();
-        if (largeImageKey != null) state.assets().setLargeImage(largeImageKey);
-        if (smallImageKey != null) state.assets().setSmallImage(smallImageKey);
+        if (largeImageURL != null) state.assets().setLargeImage(largeImageURL);
+        if (smallImageURL != null) state.assets().setSmallImage(smallImageURL);
         setDiscordActivityState(state);
     }
 

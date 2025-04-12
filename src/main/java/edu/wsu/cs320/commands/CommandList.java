@@ -222,7 +222,7 @@ public class CommandList {
         else {imageSmall = null;}
 
         discordRichPresence.updateActivityWithImages(imageLarge, imageSmall);
-        event.reply("Attempted to change images.\n*(If images are unchanged you may want to check your image keys)*").setEphemeral(true).queue();
+        event.reply("Attempted to change images.\n-# *If images are unchanged, make sure your images are square and at least 512x512*").setEphemeral(true).queue();
     }
 
     /**
