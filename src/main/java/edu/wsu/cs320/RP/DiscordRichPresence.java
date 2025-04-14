@@ -118,11 +118,11 @@ public class DiscordRichPresence {
      * Updates the calendar from the configuration settings for the rich presence status.
      */
     public void setGoogleCalendar(){
-        if (calendarEventPoll != null) calendarEventPoll.stop();
-        GoogleCalendarServiceHandler handler = new GoogleCalendarServiceHandler(GoogleCalToDiscord.googleOAuthManager.getCredentials());
-        CalendarPollingService pollingService = new CalendarPollingService(handler, GoogleCalToDiscord.config.get(ConfigValues.GOOGLE_CALENDAR_ID));
-        pollingService.start();
-        calendarEventPoll = pollingService;
+        if (calendarEventPoll == null) {
+            GoogleCalendarServiceHandler handler = new GoogleCalendarServiceHandler(GoogleCalToDiscord.googleOAuthManager.getCredentials());
+            calendarEventPoll = new CalendarPollingService(handler, GoogleCalToDiscord.config.get(ConfigValues.GOOGLE_CALENDAR_ID));
+        }
+        calendarEventPoll.setCalendarID(GoogleCalToDiscord.config.get(ConfigValues.GOOGLE_CALENDAR_ID));
     }
 
     /**
@@ -212,10 +212,6 @@ public class DiscordRichPresence {
 
     public void setDiscordActivityState(Activity state){
         updateActivity(state);
-    }
-
-    public CalendarPollingService getPollingService() {
-        return this.calendarEventPoll;
     }
 
 }

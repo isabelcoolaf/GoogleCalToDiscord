@@ -89,8 +89,8 @@ public class GoogleCalToDiscord {
                         System.out.println("User did not select a calendar. Retrying...");
                         continue;
                     case OK:
-                        discordInterface.getRichPresence().getPollingService().setCalendarID(selectorResponse.data.getId());
                         config.put(ConfigValues.DISCORD_CLIENT_ID, selectorResponse.data.getId());
+                        discordInterface.getRichPresence().setGoogleCalendar();
                         break;
                     case WINDOW_CLOSED:
                         shouldExitUILoop = true;
@@ -104,6 +104,7 @@ public class GoogleCalToDiscord {
                 break;
             }
             if (shouldExitUILoop) break;
+
             while (true) {
                 customizerResponse = controller.accessCustomizer();
                 switch (customizerResponse.status) {

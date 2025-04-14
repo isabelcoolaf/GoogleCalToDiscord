@@ -211,7 +211,7 @@ public class CommandList {
         OptionMapping largeImageOpt = event.getOption("large-image");
         OptionMapping smallImageOpt = event.getOption("small-image");
         if (smallImageOpt == null && largeImageOpt == null){
-            event.reply("Please provide an image key.").setEphemeral(true).queue();
+            event.reply("Please provide an image URL.").setEphemeral(true).queue();
             return;
         }
         String imageLarge;
@@ -258,7 +258,6 @@ public class CommandList {
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
-
                 discordRichPresence.setGoogleCalendar();
 
                 event.editMessage("**" + selection + "** is your selected calendar.").queue();
