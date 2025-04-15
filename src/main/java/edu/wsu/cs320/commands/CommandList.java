@@ -33,9 +33,14 @@ import java.util.stream.Collectors;
 public class CommandList {
     private int pageNumber;
     private final GoogleCalendarServiceHandler calHandler;
+    private final static List<CommandListener> listeners = new ArrayList<>();
 
     public CommandList(GoogleCalendarServiceHandler handler){
         calHandler = handler;
+    }
+
+    public interface CommandListener{
+        void selectedCalendarUpdate(String calName);
     }
 
     /**
@@ -259,6 +264,7 @@ public class CommandList {
                     throw new RuntimeException(e);
                 }
                 discordRichPresence.setGoogleCalendar();
+                notifyCalChange(selection);
 
                 event.editMessage("**" + selection + "** is your selected calendar.").queue();
                 event.editSelectMenu(null).queue();
@@ -325,4 +331,17 @@ public class CommandList {
 
         return menuBuilder.build();
     }
+
+    public void addCommandListener(CommandListener listener){
+        listeners.add(listener);
+    }
+
+    private void notifyCalChange(String calName){
+        for (CommandListener listener : listeners){
+            listener.selectedCalendarUpdate(calName);
+        }
+    }
+
 }
+
+
