@@ -119,6 +119,7 @@ public class DiscordRichPresence {
         if (calendarEventPoll == null) {
             GoogleCalendarServiceHandler handler = new GoogleCalendarServiceHandler(GoogleCalToDiscord.googleOAuthManager.getCredentials());
             calendarEventPoll = new CalendarPollingService(handler, GoogleCalToDiscord.config.get(ConfigValues.GOOGLE_CALENDAR_ID));
+            calendarEventPoll.start();
         }
         calendarEventPoll.setCalendarID(GoogleCalToDiscord.config.get(ConfigValues.GOOGLE_CALENDAR_ID));
     }
