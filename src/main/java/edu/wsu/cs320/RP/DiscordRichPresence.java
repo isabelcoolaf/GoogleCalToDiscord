@@ -27,6 +27,7 @@ public class DiscordRichPresence {
     private long eventEndTime;
     private boolean runDiscordActivity = true;
     private CalendarPollingService calendarEventPoll;
+    private ActivityType rpType = ActivityType.WATCHING;
 
 
     /**
@@ -81,7 +82,7 @@ public class DiscordRichPresence {
     public void updateActivityWithCalendarEvent(Event event){
         if (event != null) {
             Activity activity = new Activity();
-            activity.setType(ActivityType.WATCHING);
+            activity.setType(rpType);
             activity.setDetails(event.getSummary());
             DateTime start = event.getStart().getDateTime();
             DateTime end = event.getEnd().getDateTime();
@@ -94,7 +95,7 @@ public class DiscordRichPresence {
             updateActivity(activity);
         } else {
             Activity activity = new Activity();
-            activity.setType(ActivityType.WATCHING);
+            activity.setType(rpType);
             activity.setDetails("No Current Event");
             activity.setState("Calendar empty at this timeslot");
             updateActivity(activity);
@@ -211,5 +212,7 @@ public class DiscordRichPresence {
     public void setDiscordActivityState(Activity state){
         updateActivity(state);
     }
+
+    public void setrpType(ActivityType type){rpType = type;}
 
 }

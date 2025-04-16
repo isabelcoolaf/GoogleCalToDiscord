@@ -47,7 +47,7 @@ public class CommandList {
      * Changes the type of the rich presence status the user gets shown. (mostly useless)
      */
     public void presenceTypeCommand(DiscordRichPresence discordRichPresence, SlashCommandInteractionEvent event){
-        OptionMapping presenceOptions = event.getOption("presence_type");
+        OptionMapping presenceOptions = event.getOption("presence-type");
         String presenceResponse = presenceOptions.getAsString();
 
         Activity activity = discordRichPresence.getDiscordActivityState();
@@ -56,15 +56,19 @@ public class CommandList {
         activityTypes.put("Playing", ActivityType.PLAYING);
         activityTypes.put("Watching", ActivityType.WATCHING);
         activityTypes.put("Listening", ActivityType.LISTENING);
-        activityTypes.put("Competing", ActivityType.COMPETING);
 
         ActivityType type = activityTypes.get(presenceResponse);
         System.out.println(type);
         activity.setType(type);
+        discordRichPresence.setrpType(type);
 
         discordRichPresence.setDiscordActivityState(activity);
+        String msg = "Changed presence type to: " + presenceResponse;
+        if (presenceResponse.equals("Playing")){
+            msg += "\n *Warning: Will not display timestamps in with ` Playing ` status*";
+        }
 
-        event.reply("Changed presence type to: " + presenceResponse).setEphemeral(true).queue();
+        event.reply(msg).setEphemeral(true).queue();
     }
 
     /**

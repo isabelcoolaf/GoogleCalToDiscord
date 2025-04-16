@@ -72,7 +72,7 @@ public class SlashCommandInteractions extends ListenerAdapter {
         // names must be lowercase
         // command names must match command functionality options
         OptionData PresenceType = new OptionData(OptionType.STRING, "presence-type", "Select the presence type", true);
-        String[] choices = {"Playing", "Watching", "Listening", "Competing"};
+        String[] choices = {"Playing", "Watching", "Listening"};
         for (String choice : choices) {
             PresenceType.addChoice(choice, choice);
         }
