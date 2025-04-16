@@ -1,2 +1,5 @@
 .idea/
 target/
+out/
+META-INF/
+MANIFEST.MF/
