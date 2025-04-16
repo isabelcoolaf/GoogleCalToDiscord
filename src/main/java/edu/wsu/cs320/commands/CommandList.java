@@ -44,31 +44,6 @@ public class CommandList {
     }
 
     /**
-     * Debug command for displaying google calendar event info.
-     */
-    public void eventInfoCommand(SlashCommandInteractionEvent event){
-        ConfigManager config = new ConfigManager(ConfigValues.CONFIG_FILENAME);
-        String curCalendar = config.get(ConfigValues.GOOGLE_CALENDAR_ID);
-        if (calHandler == null){
-            event.reply("Google Calendar not authenticated! Please sign in first.").setEphemeral(true).queue();
-        } else if (curCalendar == null) {
-            event.reply("No calendar selected! Please select a calendar first.").setEphemeral(true).queue();
-        } else {
-            List<Event> events;
-            try {
-                events = calHandler.getUpcomingEvents(curCalendar);
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-            if (!events.isEmpty()){
-                event.reply("**EVENT INFO: **\n"+ events.get(0).toString() + "\n" + events.get(0).getEnd().toString()).setEphemeral(true).queue();
-            } else {
-                event.reply("No upcoming events.").setEphemeral(true).queue();
-            }
-        }
-    }
-
-    /**
      * Changes the type of the rich presence status the user gets shown. (mostly useless)
      */
     public void presenceTypeCommand(DiscordRichPresence discordRichPresence, SlashCommandInteractionEvent event){
@@ -110,7 +85,9 @@ public class CommandList {
                 throw new RuntimeException(e);
             }
             if (!events.isEmpty()){
-                event.reply("Next event: **["+ events.get(0).getSummary() +"](" +events.get(0).getHtmlLink()+ ")**").setEphemeral(true).queue();
+                event.reply("Next event: "
+                        + "**["+ events.get(0).getSummary() +"](" +events.get(0).getHtmlLink()+ ")**"
+                ).setEphemeral(true).queue();
             } else {
                 event.reply("No upcoming events.").setEphemeral(true).queue();
             }

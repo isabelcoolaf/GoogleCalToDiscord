@@ -35,9 +35,6 @@ public class SlashCommandInteractions extends ListenerAdapter {
         CommandList cmdList = new CommandList(calHandler);
         System.out.println("Command used \"" + event.getName() + "\"");
         switch (event.getName()) {
-            case "event-info":
-               cmdList.eventInfoCommand(event);
-                break;
             case "presence-type":
                 cmdList.presenceTypeCommand(discordRichPresence, event);
                 break;
@@ -86,9 +83,8 @@ public class SlashCommandInteractions extends ListenerAdapter {
         OptionData smallImageSelect = new OptionData(OptionType.STRING, "small-image", "Large Image URL", false);
 
 
-        String[] commandList = {"event-info", "presence-type", "next-event", "start-next-event", "select-calendar", "sleep", "reset", "select-images"};
+        String[] commandList = {"presence-type", "next-event", "start-next-event", "select-calendar", "sleep", "reset", "select-images"};
         String[] commandDescriptions = {
-                "Debugging command",
                 "Changes Presence Type",
                 "Shows next calendar event",
                 "Immediately displays the next calendar event",
@@ -97,7 +93,7 @@ public class SlashCommandInteractions extends ListenerAdapter {
                 "Resets calendar status settings",
                 "Select images to display on your profile presence"
         };
-        OptionData[] options = {null, PresenceType, null, null, null, sleepTime, null, largeImageSelect, smallImageSelect};
+        OptionData[] options = {PresenceType, null, null, null, sleepTime, null, largeImageSelect, smallImageSelect};
         for (int i = 0; i < commandList.length - 1; i++) {
             if (options[i] != null){
                 commands.add(Commands.slash(commandList[i], commandDescriptions[i])
