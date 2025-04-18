@@ -20,6 +20,13 @@ public class GoogleCalToDiscord {
     public static DiscordInterface discordInterface;
     public static ConfigManager config;
 
+    private static void makeInterfaceInstance(String discordClientID, String discordBotToken){
+        if (discordClientID != null && discordBotToken != null && discordInterface == null) {
+            discordInterface = new DiscordInterface(discordClientID, discordBotToken);
+            discordInterface.start();
+        }
+    }
+
     public static void main(String[] args) throws IOException {
         config = new ConfigManager(ConfigValues.CONFIG_FILENAME);
         GuiController controller = new GuiController();
@@ -31,10 +38,7 @@ public class GoogleCalToDiscord {
 
         googleOAuthManager = new GoogleOAuthManager(googleClientID, googleClientSecret, googleRefreshToken, ConfigValues.CONFIG_FILENAME);
 
-        if (discordClientID != null && discordBotToken != null) {
-            discordInterface = new DiscordInterface(discordClientID, discordBotToken);
-            discordInterface.start();
-        }
+        if (config.get(ConfigValues.GOOGLE_CALENDAR_ID) != null){makeInterfaceInstance(discordClientID, discordBotToken);}
 
         if (googleOAuthManager.isAuthenticated()) {
             System.out.println("GOOGLE AUTHENTICATION SUCCESSFUL");
@@ -63,6 +67,7 @@ public class GoogleCalToDiscord {
             config.put(ConfigValues.DISCORD_BOT_TOKEN, resp.data[3]);
             try {
                 googleOAuthManager = new GoogleOAuthManager(resp.data[0], resp.data[1], "", ConfigValues.CONFIG_FILENAME);
+                System.out.println("Created OAuth Manager!");
                 googleOAuthManager.invokeFlow();
                 if (googleOAuthManager.isAuthenticated()) {
                     config.put(ConfigValues.GOOGLE_REFRESH_TOKEN, googleOAuthManager.getCredentials().getRefreshToken());
@@ -89,7 +94,8 @@ public class GoogleCalToDiscord {
                         System.out.println("User did not select a calendar. Retrying...");
                         continue;
                     case OK:
-                        config.put(ConfigValues.DISCORD_CLIENT_ID, selectorResponse.data.getId());
+                        config.put(ConfigValues.GOOGLE_CALENDAR_ID, selectorResponse.data.getId());
+                        makeInterfaceInstance(discordClientID, discordBotToken);
                         discordInterface.getRichPresence().setGoogleCalendar();
                         break;
                     case WINDOW_CLOSED:
