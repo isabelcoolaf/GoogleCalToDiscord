@@ -7,19 +7,17 @@ import edu.wsu.cs320.RP.DiscordInterface;
 import edu.wsu.cs320.gui.control.GuiResponse;
 import edu.wsu.cs320.gui.control.ResponsiveGUI;
 
+import javax.annotation.Nullable;
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.plaf.FontUIResource;
 import javax.swing.text.StyleContext;
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.io.File;
-import java.text.SimpleDateFormat;
-import java.time.Instant;
 import java.io.IOException;
-import java.time.temporal.ChronoUnit;
-import java.time.temporal.TemporalField;
-import java.util.Date;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.time.Instant;
 import java.util.Locale;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -39,6 +37,7 @@ public class Customizer implements ResponsiveGUI<Customizer.CustomizerCode> {
     private JLabel progressLeft;
     private JLabel progressRight;
     private JPanel mainTextPanel;
+    private JTextField urlInputField;
     private CompletableFuture<GuiResponse<CustomizerCode>> pendingResponse;
     private BufferedImage image;
     private final DiscordInterface discord;
@@ -56,7 +55,7 @@ public class Customizer implements ResponsiveGUI<Customizer.CustomizerCode> {
         @Override
         public void run() {
             Activity activity;
-            System.out.println("Customizer update thread started!");
+            System.out.println("Customizer update thread started");
             while (shouldBeRunning) {
                 try {
                     synchronized (monitor) {
@@ -99,6 +98,7 @@ public class Customizer implements ResponsiveGUI<Customizer.CustomizerCode> {
                 mainPanel.validate();
                 mainPanel.repaint();
             }
+            System.out.println("Customizer update thread stopped");
         }
 
         private boolean hasInvalidState() {
@@ -113,51 +113,61 @@ public class Customizer implements ResponsiveGUI<Customizer.CustomizerCode> {
     public Customizer(JFrame frame, DiscordInterface discordInterface) {
         $$$setupUI$$$();
         discord = discordInterface;
-        backButton.addActionListener(e -> completeResponse(CustomizerCode.BACK));
-        changeImageButton.addActionListener(e -> {
-            JFileChooser fileSelector = new JFileChooser();
-            int returnVal = fileSelector.showOpenDialog(frame); // Where frame is the parent component
-            File file = null;
-            if (returnVal == JFileChooser.APPROVE_OPTION) {
-                file = fileSelector.getSelectedFile();
-            } else {
-                JOptionPane.showMessageDialog(frame, "Invalid file selected");
-            }
-            if (file == null) return;
-            if (!file.isFile() || !file.canRead()) {
-                JOptionPane.showMessageDialog(frame, "Please select a valid image.");
+        backButton.addActionListener(e -> {
+            if (pendingResponse != null)
+                pendingResponse.complete(new GuiResponse<>(GuiResponse.ResponseCode.OK, CustomizerCode.BACK));
+        });
+
+        changeImageButton.addActionListener(event -> {
+            if (urlInputField.getText().length() > 256) {
+                JOptionPane.showMessageDialog(mainPanel, "Request failed.\nDiscord disallows URLS over 256 characters.", "Link error", JOptionPane.WARNING_MESSAGE);
                 return;
             }
             try {
-                image = ImageIO.read(file);
-            } catch (IOException ex) {
-                JOptionPane.showMessageDialog(frame, "Could not read image: " + ex.getLocalizedMessage());
+                new URL(urlInputField.getText());
+            } catch (MalformedURLException e) {
+                JOptionPane.showMessageDialog(mainPanel, "Request failed.\nInvalid link provided.", "", JOptionPane.ERROR_MESSAGE);
                 return;
             }
-            imagePanel.removeAll();
-            Image scaled = image.getScaledInstance(60, 60, Image.SCALE_DEFAULT);
-            ImageIcon icon = new ImageIcon(scaled);
-            JLabel label = new JLabel(icon);
-            imagePanel.setLayout(new GridLayout(0, 1));
-            imagePanel.add(label);
-            imagePanel.validate();
-            imagePanel.repaint();
-            completeResponse(CustomizerCode.CHANGE_IMAGE);
+            pendingResponse.complete(new GuiResponse<>(GuiResponse.ResponseCode.OK, CustomizerCode.CHANGE_IMAGE));
         });
     }
 
-    private void completeResponse(CustomizerCode code) {
-        if (pendingResponse == null) return;
-        pendingResponse.complete(new GuiResponse<CustomizerCode>(GuiResponse.ResponseCode.OK, code));
+    public void updateImage(URL url) {
+
+        try {
+            image = ImageIO.read(url);
+        } catch (IOException e) {
+            return;
+        }
+        imagePanel.removeAll();
+        Image scaled = image.getScaledInstance(60, 60, Image.SCALE_DEFAULT);
+        ImageIcon icon = new ImageIcon(scaled);
+        JLabel label = new JLabel(icon);
+        imagePanel.setLayout(new GridLayout(0, 1));
+        imagePanel.add(label);
+        imagePanel.validate();
+        imagePanel.repaint();
     }
 
-    public BufferedImage getImage() {
-        return image;
+
+    @Nullable
+    public URL getImage() {
+        try {
+            return new URL(urlInputField.getText());
+        } catch (MalformedURLException e) {
+            return null;
+        }
     }
 
     public void startUpdateThread() {
         updateThread = new UpdateThread();
         updateThread.start();
+    }
+
+    public void killUpdateThread() {
+        if (updateThread == null) return;
+        updateThread.interrupt();
     }
 
     public void stopUpdateThread() {
@@ -189,6 +199,8 @@ public class Customizer implements ResponsiveGUI<Customizer.CustomizerCode> {
         stopUpdateThread();
     }
 
+//region autogenerated code
+
     private void createUIComponents() {
         // TODO: place custom component creation code here
     }
@@ -202,7 +214,7 @@ public class Customizer implements ResponsiveGUI<Customizer.CustomizerCode> {
      */
     private void $$$setupUI$$$() {
         mainPanel = new JPanel();
-        mainPanel.setLayout(new GridLayoutManager(2, 1, new Insets(0, 0, 0, 0), -1, 0));
+        mainPanel.setLayout(new GridLayoutManager(3, 1, new Insets(0, 0, 0, 0), -1, 0));
         mainPanel.setMinimumSize(new Dimension(340, 120));
         mainPanel.setPreferredSize(new Dimension(340, 120));
         buttonPanel = new JPanel();
@@ -214,26 +226,29 @@ public class Customizer implements ResponsiveGUI<Customizer.CustomizerCode> {
         changeImageButton = new JButton();
         changeImageButton.setText("Change Image");
         buttonPanel.add(changeImageButton, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        urlInputField = new JTextField();
+        urlInputField.setText("Enter a URL...");
+        mainPanel.add(urlInputField, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, -1), null, 0, false));
         previewPanel = new JPanel();
-        previewPanel.setLayout(new GridLayoutManager(2, 3, new Insets(0, 0, 0, 0), 3, 0));
+        previewPanel.setLayout(new GridLayoutManager(2, 2, new Insets(0, 5, 0, 0), 3, 0));
         previewPanel.setBackground(new Color(-13026751));
         previewPanel.setForeground(new Color(-13026751));
-        mainPanel.add(previewPanel, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_NORTHWEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, new Dimension(340, 100), new Dimension(340, 100), new Dimension(340, 100), 0, false));
+        mainPanel.add(previewPanel, new GridConstraints(2, 0, 1, 1, GridConstraints.ANCHOR_NORTHWEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, new Dimension(340, 100), new Dimension(340, 100), new Dimension(340, 100), 0, false));
         imagePanel = new JPanel();
         imagePanel.setLayout(new GridLayoutManager(1, 1, new Insets(0, 0, 0, 0), 0, 0));
-        previewPanel.add(imagePanel, new GridConstraints(1, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, new Dimension(60, 60), new Dimension(60, 60), new Dimension(60, 60), 0, false));
+        previewPanel.add(imagePanel, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, new Dimension(60, 60), new Dimension(60, 60), new Dimension(60, 60), 0, false));
         usingLabel = new JLabel();
         usingLabel.setBackground(new Color(-2104859));
         Font usingLabelFont = this.$$$getFont$$$(null, -1, -1, usingLabel.getFont());
         if (usingLabelFont != null) usingLabel.setFont(usingLabelFont);
         usingLabel.setForeground(new Color(-2565675));
         usingLabel.setText("Using GC2D");
-        previewPanel.add(usingLabel, new GridConstraints(0, 1, 1, 2, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, 1, 1, null, null, null, 0, false));
+        previewPanel.add(usingLabel, new GridConstraints(0, 0, 1, 2, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, 1, 1, null, null, null, 0, false));
         mainTextPanel = new JPanel();
         mainTextPanel.setLayout(new GridLayoutManager(3, 1, new Insets(0, 0, 0, 0), -1, -1));
         mainTextPanel.setBackground(new Color(-13026751));
         mainTextPanel.setForeground(new Color(-13026751));
-        previewPanel.add(mainTextPanel, new GridConstraints(1, 2, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_VERTICAL, 1, 1, null, null, null, 0, false));
+        previewPanel.add(mainTextPanel, new GridConstraints(1, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_VERTICAL, 1, 1, null, null, null, 0, false));
         calendarName = new JLabel();
         calendarName.setBackground(new Color(-13026751));
         calendarName.setForeground(new Color(-2039330));
@@ -263,10 +278,6 @@ public class Customizer implements ResponsiveGUI<Customizer.CustomizerCode> {
         progressBar.setBackground(new Color(-13552840));
         progressBar.setMaximum(1000);
         progressPanel.add(progressBar, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-        final JPanel panel1 = new JPanel();
-        panel1.setLayout(new GridLayoutManager(1, 1, new Insets(0, 0, 0, 0), -1, -1));
-        panel1.setForeground(new Color(-13026751));
-        previewPanel.add(panel1, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, new Dimension(0, 0), new Dimension(0, 0), new Dimension(0, 0), 0, false));
     }
 
     /** @noinspection ALL */
@@ -294,5 +305,5 @@ public class Customizer implements ResponsiveGUI<Customizer.CustomizerCode> {
         return mainPanel;
     }
 
-
+    //endregion
 }
