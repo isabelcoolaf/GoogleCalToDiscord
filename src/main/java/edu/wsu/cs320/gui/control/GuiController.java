@@ -10,6 +10,7 @@ import edu.wsu.cs320.gui.auth.AuthForm;
 import edu.wsu.cs320.gui.calendar.CalendarSelector;
 
 import java.awt.image.BufferedImage;
+import java.net.URL;
 
 /**
  * Controls the creation, destruction, and display of ResponsiveGUIs used to gather input from the user.
@@ -88,7 +89,7 @@ public class GuiController {
         if (customizer == null) {
             customizer = new Customizer(window, discordInterface);
             customizer.startUpdateThread();
-            openGUI(customizer, 350, 170);
+            openGUI(customizer, 350, 200);
             window.setResizable(false);
         }
         GuiResponse<Customizer.CustomizerCode> resp = customizer.getResponse();
@@ -99,9 +100,15 @@ public class GuiController {
         return resp;
     }
 
-    public BufferedImage getCustomizerImage() {
+    public URL getCustomizerImage() {
         if (customizer == null) return null;
         return customizer.getImage();
+    }
+
+    public void setCustomizerImage(URL url) {
+        if (customizer == null) return;
+        customizer.updateImage(url);
+
     }
 
 
@@ -131,6 +138,8 @@ public class GuiController {
 
     /** Destroy the window of the GuiController. The controller should not be used after this. */
     public void destroy() {
+        closeGUI();
+        if (customizer != null) customizer.killUpdateThread();
         window.dispose();
     }
 
