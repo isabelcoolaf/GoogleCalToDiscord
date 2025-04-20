@@ -4,7 +4,6 @@ import com.google.api.services.calendar.model.CalendarList;
 import com.google.api.services.calendar.model.CalendarListEntry;
 import edu.wsu.cs320.config.ConfigManager;
 import edu.wsu.cs320.config.ConfigValues;
-import edu.wsu.cs320.googleapi.CalendarPollingService;
 import edu.wsu.cs320.googleapi.GoogleCalendarServiceHandler;
 import edu.wsu.cs320.googleapi.GoogleOAuthManager;
 import edu.wsu.cs320.gui.Customizer.Customizer;
@@ -12,8 +11,8 @@ import edu.wsu.cs320.gui.control.GuiController;
 import edu.wsu.cs320.gui.control.GuiResponse;
 import edu.wsu.cs320.RP.DiscordInterface;
 
-import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.net.URL;
 
 public class GoogleCalToDiscord {
 
@@ -21,7 +20,7 @@ public class GoogleCalToDiscord {
     public static DiscordInterface discordInterface;
     public static ConfigManager config;
 
-    private static void makeInterfaceInstance(String discordClientID, String discordBotToken){
+    private static void makeInterfaceInstance(String discordClientID, String discordBotToken) {
         if (discordClientID != null && discordBotToken != null && discordInterface == null) {
             discordInterface = new DiscordInterface(discordClientID, discordBotToken);
             discordInterface.start();
@@ -39,7 +38,9 @@ public class GoogleCalToDiscord {
 
         googleOAuthManager = new GoogleOAuthManager(googleClientID, googleClientSecret, googleRefreshToken, ConfigValues.CONFIG_FILENAME);
 
-        if (config.get(ConfigValues.GOOGLE_CALENDAR_ID) != null){makeInterfaceInstance(discordClientID, discordBotToken);}
+        if (config.get(ConfigValues.GOOGLE_CALENDAR_ID) != null) {
+            makeInterfaceInstance(discordClientID, discordBotToken);
+        }
 
         if (googleOAuthManager.isAuthenticated()) {
             System.out.println("GOOGLE AUTHENTICATION SUCCESSFUL");
@@ -119,8 +120,11 @@ public class GoogleCalToDiscord {
                     case OK:
                         if (customizerResponse.data == Customizer.CustomizerCode.CHANGE_IMAGE) {
                             System.out.println("Image changed");
-                            BufferedImage image = controller.getCustomizerImage();
-                            // TODO: update discord interface with new image
+                            URL imageURL = controller.getCustomizerImage();
+                            if (imageURL != null) {
+                                discordInterface.getRichPresence().updateActivityWithImages(imageURL.toString(), null);
+                                controller.setCustomizerImage(imageURL);
+                            }
                             continue;
                         }
                         break;
@@ -134,5 +138,9 @@ public class GoogleCalToDiscord {
             }
             if (shouldExitUILoop) break;
         }
+        controller.destroy();
+        discordInterface.getRichPresence().stopDiscordActivity();
+        discordInterface.killBot();
     }
+
 }
