@@ -9,7 +9,6 @@ import edu.wsu.cs320.gui.Customizer.Customizer;
 import edu.wsu.cs320.gui.auth.AuthForm;
 import edu.wsu.cs320.gui.calendar.CalendarSelector;
 
-import java.awt.image.BufferedImage;
 import java.net.URL;
 
 /**
@@ -87,7 +86,7 @@ public class GuiController {
     public GuiResponse<Customizer.CustomizerCode> accessCustomizer(DiscordInterface discordInterface) {
         // If customizer not already open, open it
         if (customizer == null) {
-            customizer = new Customizer(window, discordInterface);
+            customizer = new Customizer(discordInterface);
             customizer.startUpdateThread();
             openGUI(customizer, 350, 200);
             window.setResizable(false);

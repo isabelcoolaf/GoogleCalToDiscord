@@ -4,7 +4,6 @@ import com.google.api.services.calendar.model.CalendarList;
 import com.google.api.services.calendar.model.CalendarListEntry;
 import edu.wsu.cs320.config.ConfigManager;
 import edu.wsu.cs320.config.ConfigValues;
-import edu.wsu.cs320.googleapi.CalendarPollingService;
 import edu.wsu.cs320.googleapi.GoogleCalendarServiceHandler;
 import edu.wsu.cs320.googleapi.GoogleOAuthManager;
 import edu.wsu.cs320.gui.Customizer.Customizer;
@@ -12,7 +11,6 @@ import edu.wsu.cs320.gui.control.GuiController;
 import edu.wsu.cs320.gui.control.GuiResponse;
 import edu.wsu.cs320.RP.DiscordInterface;
 
-import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.net.URL;
 

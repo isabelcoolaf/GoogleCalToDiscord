@@ -39,7 +39,6 @@ public class Customizer implements ResponsiveGUI<Customizer.CustomizerCode> {
     private JPanel mainTextPanel;
     private JTextField urlInputField;
     private CompletableFuture<GuiResponse<CustomizerCode>> pendingResponse;
-    private BufferedImage image;
     private final DiscordInterface discord;
     private UpdateThread updateThread;
 
@@ -110,7 +109,7 @@ public class Customizer implements ResponsiveGUI<Customizer.CustomizerCode> {
         BACK, CHANGE_IMAGE
     }
 
-    public Customizer(JFrame frame, DiscordInterface discordInterface) {
+    public Customizer(DiscordInterface discordInterface) {
         $$$setupUI$$$();
         discord = discordInterface;
         backButton.addActionListener(e -> {
@@ -135,6 +134,7 @@ public class Customizer implements ResponsiveGUI<Customizer.CustomizerCode> {
 
     public void updateImage(URL url) {
 
+        BufferedImage image;
         try {
             image = ImageIO.read(url);
         } catch (IOException e) {
@@ -195,7 +195,7 @@ public class Customizer implements ResponsiveGUI<Customizer.CustomizerCode> {
     @Override
     public void onWindowClose() {
         if (pendingResponse == null) return;
-        pendingResponse.complete(new GuiResponse<CustomizerCode>(GuiResponse.ResponseCode.WINDOW_CLOSED, null));
+        pendingResponse.complete(new GuiResponse<>(GuiResponse.ResponseCode.WINDOW_CLOSED, null));
         stopUpdateThread();
     }
 
