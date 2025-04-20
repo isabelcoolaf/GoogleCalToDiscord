@@ -4,6 +4,7 @@ import javax.swing.*;
 
 import com.google.api.services.calendar.model.CalendarList;
 import com.google.api.services.calendar.model.CalendarListEntry;
+import edu.wsu.cs320.RP.DiscordInterface;
 import edu.wsu.cs320.gui.Customizer.Customizer;
 import edu.wsu.cs320.gui.auth.AuthForm;
 import edu.wsu.cs320.gui.calendar.CalendarSelector;
@@ -82,11 +83,12 @@ public class GuiController {
      *
      * @return The response received from the customizer GUI.
      */
-    public GuiResponse<Customizer.CustomizerCode> accessCustomizer() {
+    public GuiResponse<Customizer.CustomizerCode> accessCustomizer(DiscordInterface discordInterface) {
         // If customizer not already open, open it
         if (customizer == null) {
-            customizer = new Customizer(window);
-            openGUI(customizer, 340, 170);
+            customizer = new Customizer(window, discordInterface);
+            customizer.startUpdateThread();
+            openGUI(customizer, 350, 170);
             window.setResizable(false);
         }
         GuiResponse<Customizer.CustomizerCode> resp = customizer.getResponse();
@@ -123,6 +125,7 @@ public class GuiController {
 
     private void closeGUI() {
         window.setVisible(false);
+        gui.onWindowClose();
         if (guiPanel != null) window.remove(guiPanel);
     }
 
