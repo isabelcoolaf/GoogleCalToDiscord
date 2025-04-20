@@ -11,6 +11,7 @@ public class DiscordInterface extends Thread{
     private final String id, token;
     private DiscordRichPresence richPresence;
     private JDA bot;
+
     public DiscordInterface(String id, String token){
         this.id = id;
         this.token = token;

@@ -33,41 +33,21 @@ import java.util.stream.Collectors;
 public class CommandList {
     private int pageNumber;
     private final GoogleCalendarServiceHandler calHandler;
+    private final static List<CommandListener> listeners = new ArrayList<>();
 
     public CommandList(GoogleCalendarServiceHandler handler){
         calHandler = handler;
     }
 
-    /**
-     * Debug command for displaying google calendar event info.
-     */
-    public void eventInfoCommand(SlashCommandInteractionEvent event){
-        ConfigManager config = new ConfigManager(ConfigValues.CONFIG_FILENAME);
-        String curCalendar = config.get(ConfigValues.GOOGLE_CALENDAR_ID);
-        if (calHandler == null){
-            event.reply("Google Calendar not authenticated! Please sign in first.").setEphemeral(true).queue();
-        } else if (curCalendar == null) {
-            event.reply("No calendar selected! Please select a calendar first.").setEphemeral(true).queue();
-        } else {
-            List<Event> events;
-            try {
-                events = calHandler.getUpcomingEvents(curCalendar);
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-            if (!events.isEmpty()){
-                event.reply("**EVENT INFO: **\n"+ events.get(0).toString() + "\n" + events.get(0).getEnd().toString()).setEphemeral(true).queue();
-            } else {
-                event.reply("No upcoming events.").setEphemeral(true).queue();
-            }
-        }
+    public interface CommandListener{
+        void selectedCalendarUpdate(String calName);
     }
 
     /**
      * Changes the type of the rich presence status the user gets shown. (mostly useless)
      */
     public void presenceTypeCommand(DiscordRichPresence discordRichPresence, SlashCommandInteractionEvent event){
-        OptionMapping presenceOptions = event.getOption("presence_type");
+        OptionMapping presenceOptions = event.getOption("presence-type");
         String presenceResponse = presenceOptions.getAsString();
 
         Activity activity = discordRichPresence.getDiscordActivityState();
@@ -76,15 +56,19 @@ public class CommandList {
         activityTypes.put("Playing", ActivityType.PLAYING);
         activityTypes.put("Watching", ActivityType.WATCHING);
         activityTypes.put("Listening", ActivityType.LISTENING);
-        activityTypes.put("Competing", ActivityType.COMPETING);
 
         ActivityType type = activityTypes.get(presenceResponse);
         System.out.println(type);
         activity.setType(type);
+        discordRichPresence.setrpType(type);
 
         discordRichPresence.setDiscordActivityState(activity);
+        String msg = "Changed presence type to: " + presenceResponse;
+        if (presenceResponse.equals("Playing")){
+            msg += "\n *Warning: Will not display timestamps in with ` Playing ` status*";
+        }
 
-        event.reply("Changed presence type to: " + presenceResponse).setEphemeral(true).queue();
+        event.reply(msg).setEphemeral(true).queue();
     }
 
     /**
@@ -105,7 +89,9 @@ public class CommandList {
                 throw new RuntimeException(e);
             }
             if (!events.isEmpty()){
-                event.reply("Next event: **["+ events.get(0).getSummary() +"](" +events.get(0).getHtmlLink()+ ")**").setEphemeral(true).queue();
+                event.reply("Next event: "
+                        + "**["+ events.get(0).getSummary() +"](" +events.get(0).getHtmlLink()+ ")**"
+                ).setEphemeral(true).queue();
             } else {
                 event.reply("No upcoming events.").setEphemeral(true).queue();
             }
@@ -211,7 +197,7 @@ public class CommandList {
         OptionMapping largeImageOpt = event.getOption("large-image");
         OptionMapping smallImageOpt = event.getOption("small-image");
         if (smallImageOpt == null && largeImageOpt == null){
-            event.reply("Please provide an image key.").setEphemeral(true).queue();
+            event.reply("Please provide an image URL.").setEphemeral(true).queue();
             return;
         }
         String imageLarge;
@@ -258,8 +244,8 @@ public class CommandList {
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
-
                 discordRichPresence.setGoogleCalendar();
+                notifyCalChange(selection);
 
                 event.editMessage("**" + selection + "** is your selected calendar.").queue();
                 event.editSelectMenu(null).queue();
@@ -326,4 +312,17 @@ public class CommandList {
 
         return menuBuilder.build();
     }
+
+    public void addCommandListener(CommandListener listener){
+        listeners.add(listener);
+    }
+
+    private void notifyCalChange(String calName){
+        for (CommandListener listener : listeners){
+            listener.selectedCalendarUpdate(calName);
+        }
+    }
+
 }
+
+
