@@ -55,6 +55,7 @@ public class CalendarPollingService {
     }
 
     private void task() {
+        if (calendarID == null) return;
         System.out.println("Running background polling task...");
         long currentEpochMs = Instant.now().truncatedTo(ChronoUnit.MINUTES).toEpochMilli();
 
