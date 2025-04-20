@@ -2,7 +2,8 @@ package edu.wsu.cs320.gui.Customizer;
 
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
-import com.intellij.uiDesigner.core.Spacer;
+import de.jcm.discordgamesdk.activity.Activity;
+import edu.wsu.cs320.RP.DiscordInterface;
 import edu.wsu.cs320.gui.control.GuiResponse;
 import edu.wsu.cs320.gui.control.ResponsiveGUI;
 
@@ -13,7 +14,12 @@ import javax.swing.text.StyleContext;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.text.SimpleDateFormat;
+import java.time.Instant;
 import java.io.IOException;
+import java.time.temporal.ChronoUnit;
+import java.time.temporal.TemporalField;
+import java.util.Date;
 import java.util.Locale;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -28,20 +34,85 @@ public class Customizer implements ResponsiveGUI<Customizer.CustomizerCode> {
     private JLabel usingLabel;
     private JLabel calendarName;
     private JPanel progressPanel;
-    private JProgressBar progressBar1;
-    private JLabel descriptionLabel;
+    private JProgressBar progressBar;
+    private JLabel calendarDescription;
     private JLabel progressLeft;
     private JLabel progressRight;
     private JPanel mainTextPanel;
     private CompletableFuture<GuiResponse<CustomizerCode>> pendingResponse;
     private BufferedImage image;
+    private final DiscordInterface discord;
+    private UpdateThread updateThread;
+
+    private class UpdateThread extends Thread {
+        private boolean shouldBeRunning = true;
+        private final Object monitor = new Object();
+
+        UpdateThread() {
+            setName("Customizer update thread");
+        }
+
+
+        @Override
+        public void run() {
+            Activity activity;
+            System.out.println("Customizer update thread started!");
+            while (shouldBeRunning) {
+                try {
+                    synchronized (monitor) {
+                        monitor.wait(100); // Update every .1 seconds
+                    }
+                } catch (IllegalMonitorStateException e) {
+                    shouldBeRunning = false;
+                } catch (InterruptedException e) {
+                    shouldBeRunning = false;
+                    continue;
+                }
+                if (hasInvalidState()) continue;
+                activity = discord.getRichPresence().getDiscordActivityState();
+                Instant timeStart = null;
+                Instant timeEnd = null;
+                try {
+                    timeStart = activity.timestamps().getStart();
+                    timeEnd = activity.timestamps().getEnd();
+                } catch (NullPointerException e) {
+                    // Current activity does not have a time
+                }
+                mainPanel.invalidate();
+                if (timeStart != null && timeEnd != null) {
+                    Instant timeCurrent = Instant.now();
+                    long timeElapsed = timeCurrent.getEpochSecond() - timeStart.getEpochSecond();
+                    long timeTotal = timeEnd.getEpochSecond() - timeStart.getEpochSecond();
+                    float progressRatio = (float) (timeElapsed / timeTotal);
+                    int progress = (int) progressRatio * 1000;
+                    String startString = String.format("%02d:%02d:%02d", timeElapsed / 3600, (timeElapsed / 60) % 60, timeElapsed % 60);
+                    String endString = String.format("%02d:%02d:%02d", timeTotal / 3600, (timeTotal / 60) % 60, timeTotal % 60);
+                    progressLeft.setText(startString);
+                    progressRight.setText(endString);
+                    progressBar.setValue(progress);
+                    progressPanel.setVisible(true);
+                } else {
+                    progressPanel.setVisible(false);
+                }
+                calendarName.setText(activity.getDetails());
+                calendarDescription.setText(activity.getState());
+                mainPanel.validate();
+                mainPanel.repaint();
+            }
+        }
+
+        private boolean hasInvalidState() {
+            return !mainPanel.isVisible() || discord == null;
+        }
+    }
 
     public enum CustomizerCode {
         BACK, CHANGE_IMAGE
     }
 
-    public Customizer(JFrame frame) {
+    public Customizer(JFrame frame, DiscordInterface discordInterface) {
         $$$setupUI$$$();
+        discord = discordInterface;
         backButton.addActionListener(e -> completeResponse(CustomizerCode.BACK));
         changeImageButton.addActionListener(e -> {
             JFileChooser fileSelector = new JFileChooser();
@@ -84,6 +155,16 @@ public class Customizer implements ResponsiveGUI<Customizer.CustomizerCode> {
         return image;
     }
 
+    public void startUpdateThread() {
+        updateThread = new UpdateThread();
+        updateThread.start();
+    }
+
+    public void stopUpdateThread() {
+        if (updateThread == null) return;
+        updateThread.shouldBeRunning = false;
+    }
+
     @Override
     public JPanel getGuiPanel() {
         return mainPanel;
@@ -105,6 +186,7 @@ public class Customizer implements ResponsiveGUI<Customizer.CustomizerCode> {
     public void onWindowClose() {
         if (pendingResponse == null) return;
         pendingResponse.complete(new GuiResponse<CustomizerCode>(GuiResponse.ResponseCode.WINDOW_CLOSED, null));
+        stopUpdateThread();
     }
 
     private void createUIComponents() {
@@ -120,7 +202,7 @@ public class Customizer implements ResponsiveGUI<Customizer.CustomizerCode> {
      */
     private void $$$setupUI$$$() {
         mainPanel = new JPanel();
-        mainPanel.setLayout(new GridLayoutManager(2, 1, new Insets(0, 0, 0, 0), -1, -1));
+        mainPanel.setLayout(new GridLayoutManager(2, 1, new Insets(0, 0, 0, 0), -1, 0));
         mainPanel.setMinimumSize(new Dimension(340, 120));
         mainPanel.setPreferredSize(new Dimension(340, 120));
         buttonPanel = new JPanel();
@@ -157,11 +239,11 @@ public class Customizer implements ResponsiveGUI<Customizer.CustomizerCode> {
         calendarName.setForeground(new Color(-2039330));
         calendarName.setText("<Calendar Name>");
         mainTextPanel.add(calendarName, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-        descriptionLabel = new JLabel();
-        descriptionLabel.setBackground(new Color(-13026751));
-        descriptionLabel.setForeground(new Color(-2039330));
-        descriptionLabel.setText("<Calendar Description>");
-        mainTextPanel.add(descriptionLabel, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        calendarDescription = new JLabel();
+        calendarDescription.setBackground(new Color(-13026751));
+        calendarDescription.setForeground(new Color(-988432));
+        calendarDescription.setText("<Calendar Description>");
+        mainTextPanel.add(calendarDescription, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         progressPanel = new JPanel();
         progressPanel.setLayout(new GridLayoutManager(1, 3, new Insets(0, 0, 0, 0), -1, -1));
         progressPanel.setBackground(new Color(-13026751));
@@ -177,9 +259,10 @@ public class Customizer implements ResponsiveGUI<Customizer.CustomizerCode> {
         progressRight.setForeground(new Color(-2039330));
         progressRight.setText("XX:XX");
         progressPanel.add(progressRight, new GridConstraints(0, 2, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-        progressBar1 = new JProgressBar();
-        progressBar1.setBackground(new Color(-13552840));
-        progressPanel.add(progressBar1, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        progressBar = new JProgressBar();
+        progressBar.setBackground(new Color(-13552840));
+        progressBar.setMaximum(1000);
+        progressPanel.add(progressBar, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         final JPanel panel1 = new JPanel();
         panel1.setLayout(new GridLayoutManager(1, 1, new Insets(0, 0, 0, 0), -1, -1));
         panel1.setForeground(new Color(-13026751));

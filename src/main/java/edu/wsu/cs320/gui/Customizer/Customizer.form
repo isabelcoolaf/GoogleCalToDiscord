@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <form xmlns="http://www.intellij.com/uidesigner/form/" version="1" bind-to-class="edu.wsu.cs320.gui.Customizer.Customizer">
-  <grid id="27dc6" binding="mainPanel" layout-manager="GridLayoutManager" row-count="2" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+  <grid id="27dc6" binding="mainPanel" layout-manager="GridLayoutManager" row-count="2" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="0">
     <margin top="0" left="0" bottom="0" right="0"/>
     <constraints>
       <xy x="20" y="20" width="350" height="206"/>
@@ -97,13 +97,13 @@
                   <text value="&lt;Calendar Name&gt;"/>
                 </properties>
               </component>
-              <component id="9b186" class="javax.swing.JLabel" binding="descriptionLabel">
+              <component id="9b186" class="javax.swing.JLabel" binding="calendarDescription">
                 <constraints>
                   <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                 </constraints>
                 <properties>
                   <background color="-13026751"/>
-                  <foreground color="-2039330"/>
+                  <foreground color="-988432"/>
                   <text value="&lt;Calendar Description&gt;"/>
                 </properties>
               </component>
@@ -138,12 +138,13 @@
                       <text value="XX:XX"/>
                     </properties>
                   </component>
-                  <component id="54e8e" class="javax.swing.JProgressBar" binding="progressBar1" default-binding="true">
+                  <component id="54e8e" class="javax.swing.JProgressBar" binding="progressBar">
                     <constraints>
                       <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
                     </constraints>
                     <properties>
                       <background color="-13552840"/>
+                      <maximum value="1000"/>
                     </properties>
                   </component>
                 </children>
