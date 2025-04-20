@@ -4,6 +4,7 @@ import com.google.api.services.calendar.model.CalendarList;
 import com.google.api.services.calendar.model.CalendarListEntry;
 import edu.wsu.cs320.config.ConfigManager;
 import edu.wsu.cs320.config.ConfigValues;
+import edu.wsu.cs320.googleapi.CalendarPollingService;
 import edu.wsu.cs320.googleapi.GoogleCalendarServiceHandler;
 import edu.wsu.cs320.googleapi.GoogleOAuthManager;
 import edu.wsu.cs320.gui.Customizer.Customizer;
@@ -78,6 +79,7 @@ public class GoogleCalToDiscord {
                 // the function also blocks until complete, so keep that in mind
             }
         }
+
         // Get calendar
         System.out.println("Getting calendar...");
         GoogleCalendarServiceHandler calendarServiceHandler = new GoogleCalendarServiceHandler(googleOAuthManager.getCredentials());
@@ -112,7 +114,7 @@ public class GoogleCalToDiscord {
             if (shouldExitUILoop) break;
 
             while (true) {
-                customizerResponse = controller.accessCustomizer();
+                customizerResponse = controller.accessCustomizer(discordInterface);
                 switch (customizerResponse.status) {
                     case OK:
                         if (customizerResponse.data == Customizer.CustomizerCode.CHANGE_IMAGE) {
