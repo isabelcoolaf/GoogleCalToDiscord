@@ -92,6 +92,11 @@ public class GoogleOAuthManager {
         context.addServlet(new ServletHolder(new HttpServlet() {
             @Override
             protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+                if (!req.getRequestURI().equals("/")) {
+                    resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
+                    return;
+                }
+
                 String err = req.getParameter("error");
                 if (err != null && !err.isEmpty()) {
                     resp.getWriter().write(err);

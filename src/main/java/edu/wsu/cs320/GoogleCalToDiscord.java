@@ -13,6 +13,7 @@ import edu.wsu.cs320.RP.DiscordInterface;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.Locale;
 
 public class GoogleCalToDiscord {
 
@@ -67,6 +68,10 @@ public class GoogleCalToDiscord {
             config.put(ConfigValues.GOOGLE_CLIENT_SECRET, resp.data[1]);
             config.put(ConfigValues.DISCORD_CLIENT_ID, resp.data[2]);
             config.put(ConfigValues.DISCORD_BOT_TOKEN, resp.data[3]);
+            googleClientID = resp.data[0];
+            googleClientSecret = resp.data[1];
+            discordClientID = resp.data[2];
+            discordBotToken = resp.data[3];
             try {
                 googleOAuthManager = new GoogleOAuthManager(resp.data[0], resp.data[1], "", ConfigValues.CONFIG_FILENAME);
                 System.out.println("Created OAuth Manager!");
@@ -99,7 +104,8 @@ public class GoogleCalToDiscord {
                     case OK:
                         config.put(ConfigValues.GOOGLE_CALENDAR_ID, selectorResponse.data.getId());
                         makeInterfaceInstance(discordClientID, discordBotToken);
-                        discordInterface.getRichPresence().setGoogleCalendar();
+                        if (discordInterface != null && discordInterface.getRichPresence() != null)
+                            discordInterface.getRichPresence().setGoogleCalendar();
                         break;
                     case WINDOW_CLOSED:
                         shouldExitUILoop = true;
